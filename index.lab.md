@@ -227,18 +227,20 @@ Duration: 10:00
 cat run_digest.py
 ```
 
-`run_digest()` is a stub (just `pass`). Before starting, look at the top of the file: `AGENTS_MD`, `SKILL_MD`, and `GENERATE_PDF_PY` are loaded from the `.agents/` directory using `Path.read_text()`. Open those files to read the editorial voice, the PDF playbook, and the pre-built renderer the agent will use. You will build `run_digest()` across the first two exercises. The remaining exercises each introduce a separate file (`download_pdf.py`, `refine_digest.py`, `save_agent.py`).
+`run_digest()` is a stub (just `pass`). Two helpers are already pre-filled above it:
 
-`run_stream()` is already pre-filled at the top of the file. It processes the event stream and returns `(environment_id, interaction_id)`. You do not need to write the event loop yourself, but read through it to understand what each event type carries.
+- `load_source(path)`: reads a file from `.agents/` relative to the script. Open the files in `.agents/` to read the editorial voice, PDF playbook, and pre-built renderer. You will load them in the next exercise.
+- `run_stream(stream)`: processes the event stream and returns `(environment_id, interaction_id)`. You do not need to write the event loop yourself, but read through it to understand what each event type carries.
 
-**The event loop** inside `run_stream()` dispatches on `event.event_type`:
+**The event loop** inside `run_stream()` dispatches on `event.event_type` and `step.type`:
 
-| `event_type` | What it carries | What it does |
+| `step.type` | What it is | What `run_stream()` prints |
 |---|---|---|
-| `"interaction.created"` | sandbox is ready | prints `"[agent started]"` |
-| `"step.start"` where `step.type == "function_call"` | agent is calling a tool | prints `step.name` |
-| `"step.delta"` where `delta.type == "text"` | agent is writing a text chunk | prints `delta.text` |
-| `"interaction.completed"` | agent finished | extracts `environment_id` and `interaction_id` |
+| `"url_context_call"` | agent fetching a URL | `[tool] url_context (https://...)` |
+| `"code_execution_call"` | agent running code | `[tool] run_code (first line...)` |
+| `"google_search_call"` | agent searching the web | `[tool] google_search (query...)` |
+| `"function_call"` | any other tool | `[tool] <name>` |
+| `step.delta` where `delta.type == "text"` | agent writing text | streamed directly to stdout |
 
 ### What to add
 
@@ -268,7 +270,7 @@ Replace `pass` with:
 - **`agent=BASE_AGENT`**: selects the Antigravity agent (`antigravity-preview-05-2026`). One call provisions a fully managed Ubuntu environment with Python 3.12, Node 22, git, pip, and curl pre-installed. No container to build, no deployment to run.
 - **`input`**: the task for this run. The agent browses Hacker News and reasons about the results.
 - **`environment="remote"`**: provisions a fresh cloud sandbox for this interaction.
-- **`stream=True`**: returns an iterable of events instead of blocking. Without it, the call waits 30-90 seconds and returns all output at once. With streaming you see the agent reason and act as it happens.
+- **`stream=True`**: returns an iterable of events instead of blocking. Without it, the call waits 30-90 seconds and returns all output at once as `interaction.output_text`. With streaming you see the agent reason and act as it happens. Streaming is not an advanced feature here — it is the right default, because a 90-second black box gives you no signal about whether the agent is working or stuck.
 
 **What you just provisioned:** every `interactions.create()` call boots a dedicated sandbox:
 
@@ -296,9 +298,9 @@ You should see live output as the agent works:
 
 ```text
 [agent started]
-  [tool] url_context
-  [tool] url_context
-  [tool] run_code
+  [tool] url_context (https://news.ycombinator.com)
+  [tool] url_context (https://news.ycombinator.com/item?id=...)
+  [tool] run_code (import json...)
 Today's top Hacker News stories...
 Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d
 ```
@@ -311,9 +313,7 @@ The API returns a real `environment_id` even with `environment="remote"`. The sa
 
 Duration: 08:00
 
-The agent had no instructions: no voice, no skill, no PDF generator. In this step you mount the configuration files from `.agents/` into the sandbox and switch to the full PROMPT.
-
-The three constants at the top of `run_digest.py` (`AGENTS_MD`, `SKILL_MD`, `GENERATE_PDF_PY`) are already loaded from the files in `.agents/` using `Path.read_text()`. You do not need to type any content. Your task is to pass them to the API via `environment.sources`.
+The agent had no instructions: no voice, no skill, no PDF generator. In this step you load the configuration files from `.agents/` and mount them into the sandbox.
 
 > aside positive
 >
@@ -321,10 +321,26 @@ The three constants at the top of `run_digest.py` (`AGENTS_MD`, `SKILL_MD`, `GEN
 
 ### What to change
 
-Make three changes to `run_digest()`:
+Make four changes to `run_digest.py`:
 
-1. Change `input` to `PROMPT`
-2. Change `environment` from `"remote"` to:
+1. Below `load_source()`, add the three module-level constants (these sit outside `run_digest()`, at the top of the file):
+
+```python
+AGENTS_MD       = load_source(".agents/AGENTS.md")
+SKILL_MD        = load_source(".agents/skills/digest-pdf/SKILL.md")
+GENERATE_PDF_PY = load_source(".agents/skills/digest-pdf/scripts/generate_pdf.py")
+```
+
+Open each file to see what you are loading: `AGENTS.md` sets the editorial voice and workflow rules; `SKILL.md` is the step-by-step PDF playbook; `generate_pdf.py` is the pre-built renderer the agent will run.
+
+> aside positive
+>
+> **Why `PROMPT`?** `AGENTS.md` and `SKILL.md` tell the agent HOW to generate a digest, but the agent still needs a trigger to know WHEN to start and WHERE to save the file. `PROMPT` provides that: it activates the skill and specifies the output path. Without it the agent has no task to begin.
+
+Now make three changes inside `run_digest()`:
+
+2. Change `input` to `PROMPT`
+3. Change `environment` from `"remote"` to:
 
 ```python
         environment={
@@ -349,7 +365,7 @@ Make three changes to `run_digest()`:
         },
 ```
 
-3. Add these lines right after `print(f"\nDone. environment_id={environment_id}")`:
+4. Add these lines right after `print(f"\nDone. environment_id={environment_id}")`:
 
 ```python
     set_key(".env", "ENVIRONMENT_ID", environment_id)
@@ -399,11 +415,10 @@ The run now takes 1-3 minutes. You should see the agent reading config files, wr
 
 ```text
 [agent started]
-  [tool] read_file
-  [tool] list_files
-  [tool] read_file
-  [tool] write_file
-  [tool] write_file
+  [tool] url_context (https://news.ycombinator.com)
+  [tool] url_context (https://techcrunch.com)
+  [tool] run_code (import json...)
+  [tool] run_code (import subprocess...)
 I have successfully created today's tech news digest.
 ...editorial summaries in the configured voice...
 Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d

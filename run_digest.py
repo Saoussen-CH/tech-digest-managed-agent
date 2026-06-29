@@ -16,15 +16,18 @@ load_dotenv()
 BASE_AGENT = "antigravity-preview-05-2026"
 BASE_DIR = Path(__file__).resolve().parent
 
-# Agent configuration files, read from .agents/ at startup
-AGENTS_MD       = (BASE_DIR / ".agents/AGENTS.md").read_text(encoding="utf-8")
-SKILL_MD        = (BASE_DIR / ".agents/skills/digest-pdf/SKILL.md").read_text(encoding="utf-8")
-GENERATE_PDF_PY = (BASE_DIR / ".agents/skills/digest-pdf/scripts/generate_pdf.py").read_text(encoding="utf-8")
-
 PROMPT = (
     "Generate today's tech digest and save it as /workspace/digest.pdf. "
     "Follow the digest-pdf skill."
 )
+
+
+def load_source(relative_path: str) -> str:
+    """Read a config file from the .agents/ directory."""
+    return (BASE_DIR / relative_path).read_text(encoding="utf-8")
+
+
+# TODO (Customize step): load AGENTS_MD, SKILL_MD, and GENERATE_PDF_PY using load_source()
 
 
 def run_stream(stream) -> tuple[str, str]:
@@ -45,9 +48,27 @@ def run_stream(stream) -> tuple[str, str]:
             step = getattr(event, "step", None)
             if step:
                 stype = getattr(step, "type", "")
-                name  = getattr(step, "name", "")
-                if stype == "function_call" and name:
-                    print(f"  [tool] {name}", flush=True)
+                args  = getattr(step, "arguments", None)
+
+                if stype == "function_call":
+                    name = getattr(step, "name", "")
+                    if name:
+                        print(f"  [tool] {name}", flush=True)
+
+                elif stype == "url_context_call":
+                    urls = getattr(args, "urls", []) if args else []
+                    label = urls[0] if urls else "url"
+                    print(f"  [tool] url_context ({label})", flush=True)
+
+                elif stype == "code_execution_call":
+                    code = getattr(args, "code", "") if args else ""
+                    label = code.split("\n")[0][:60] if code else ""
+                    print(f"  [tool] run_code ({label})" if label else "  [tool] run_code", flush=True)
+
+                elif stype == "google_search_call":
+                    queries = getattr(args, "queries", []) if args else []
+                    label = queries[0] if queries else ""
+                    print(f"  [tool] google_search ({label})" if label else "  [tool] google_search", flush=True)
 
         elif event_type == "step.delta":
             delta = getattr(event, "delta", None)
@@ -64,7 +85,7 @@ def run_stream(stream) -> tuple[str, str]:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Build this function through Steps 1-2.
+# Build this function through the first two exercises.
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_digest():

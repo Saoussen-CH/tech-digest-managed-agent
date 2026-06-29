@@ -294,9 +294,12 @@ You should see live output as the agent works:
 ```text
 [agent started]
   [tool] run_code
-Here are the top 5 stories currently on the Hacker News front page:
+Here are the top 5 stories currently on the Hacker News front page, retrieved via the official Hacker News API:
+
+1. **Qwen 3.6 27B is the sweet spot for local development** — 471 points
+2. **.self: A new top-level domain designed to support self-hosting** — 116 points
 ...
-Done. environment_id=863e7fa217a54236e278eb61b2e2538c
+Done. environment_id=e3de58774073f75a6ef42924c6ce2e88
 ```
 
 The API returns a real `environment_id` even with `environment="remote"`. The sandbox ran. What is missing is config: no voice, no skill, no PDF generator. The agent just printed stories as text and stopped. The next step adds those.

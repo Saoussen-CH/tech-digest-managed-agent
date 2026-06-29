@@ -65,7 +65,11 @@ def run_stream(stream) -> tuple[str, str]:
                     print(f"  [tool] url_context ({label})", flush=True)
 
                 elif stype == "code_execution_call":
-                    code = getattr(args, "code", "") if args else ""
+                    code = None
+                    if args:
+                        code = (getattr(args, "code", None)
+                                or getattr(args, "input", None)
+                                or getattr(args, "source", None))
                     label = code.split("\n")[0][:60] if code else ""
                     print(f"  [tool] run_code ({label})" if label else "  [tool] run_code", flush=True)
 

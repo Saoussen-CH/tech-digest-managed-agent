@@ -239,7 +239,7 @@ cloudshell edit run_digest.py
 
 ### What to add
 
-Replace `pass` with:
+**TODO 1:** replace `pass` with:
 
 ```python
     from google import genai

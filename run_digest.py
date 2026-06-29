@@ -101,6 +101,8 @@ def run_stream(stream) -> tuple[str, str]:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def run_digest():
+    # TODO 1: create a genai.Client, call interactions.create() with agent=BASE_AGENT,
+    # input, stream=True, and environment="remote", then pass the stream to run_stream()
     pass
 
 

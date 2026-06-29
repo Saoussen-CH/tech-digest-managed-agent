@@ -438,10 +438,11 @@ Done. environment_id=4129ffd75574e308748e9425d7ec828f
     r.raise_for_status()
 </code></pre>
 <p>The URL addresses the sandbox snapshot. <code>params={"alt": "media"}</code> returns raw bytes instead of metadata. Your existing <code>GEMINI_API_KEY</code> authenticates the Files API too.</p>
-<p><strong>TODO 2:</strong> extract only the PDF from the tar archive and read its bytes:</p>
-<pre><code language="language-python" class="language-python">            tar.extract(&#34;workspace/digest.pdf&#34;, path=tmp)
+<p><strong>TODO 2:</strong> find and extract the PDF from the tar archive:</p>
+<pre><code language="language-python" class="language-python">            member = next(m for m in tar.getmembers() if m.name.endswith(&#34;workspace/digest.pdf&#34;))
+            tar.extract(member, path=tmp, filter=&#34;data&#34;)
 </code></pre>
-<p>The agent saved the PDF to <code>/workspace/digest.pdf</code> inside the sandbox, so that is its path in the tar. Extracting only this one member (rather than calling <code>extractall()</code>) avoids permission errors on Mac caused by <code>/dev</code> entries in the snapshot.</p>
+<p>The tar path prefix varies across runs, so search by suffix instead of hardcoding the exact path. <code>filter="data"</code> suppresses the Python 3.13 deprecation warning about unsafe tar extraction.</p>
 <h2 is-upgraded>Verify</h2>
 <pre><code language="language-bash" class="language-bash">uv run python download_pdf.py
 </code></pre>

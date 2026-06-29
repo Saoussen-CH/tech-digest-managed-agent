@@ -480,13 +480,14 @@ Open `download_pdf.py`. It has two TODOs.
 
 The URL addresses the sandbox snapshot. `params={"alt": "media"}` returns raw bytes instead of metadata. Your existing `GEMINI_API_KEY` authenticates the Files API too.
 
-**TODO 2:** extract only the PDF from the tar archive and read its bytes:
+**TODO 2:** find and extract the PDF from the tar archive:
 
 ```python
-            tar.extract("workspace/digest.pdf", path=tmp)
+            member = next(m for m in tar.getmembers() if m.name.endswith("workspace/digest.pdf"))
+            tar.extract(member, path=tmp, filter="data")
 ```
 
-The agent saved the PDF to `/workspace/digest.pdf` inside the sandbox, so that is its path in the tar. Extracting only this one member (rather than calling `extractall()`) avoids permission errors on Mac caused by `/dev` entries in the snapshot.
+The tar path prefix varies across runs, so search by suffix instead of hardcoding the exact path. `filter="data"` suppresses the Python 3.13 deprecation warning about unsafe tar extraction.
 
 ### Verify
 

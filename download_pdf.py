@@ -23,9 +23,9 @@ def fetch_pdf(environment_id: str) -> bytes:
         with tarfile.open(tar_path) as tar:
             # TODO 2: Read the PDF bytes from the extracted sandbox filesystem.
             # The agent saved the file to /workspace/digest.pdf inside the sandbox.
-            # Extract only that file (extracting everything causes permission errors on Mac).
+            # Find the member by suffix (the tar path prefix varies) and extract it.
             raise NotImplementedError("Fill in TODO 2 before running this file.")
-        return (Path(tmp) / "workspace" / "digest.pdf").read_bytes()
+        return next(Path(tmp).rglob("digest.pdf")).read_bytes()
 
 
 if __name__ == "__main__":

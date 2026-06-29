@@ -428,13 +428,18 @@ The run now takes 1-3 minutes. You should see the agent reading config files, wr
 
 ```text
 [agent started]
+  [tool] read_file
+  [tool] list_files
   [tool] run_code
   [tool] run_code
-  [tool] read_file (/workspace/summaries.json)
+  [tool] write_file
   [tool] run_code
-I have successfully created today's tech news digest.
-...editorial summaries in the configured voice...
-Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d
+  [tool] write_file
+  [tool] run_code
+  [tool] run_code
+  [tool] run_code
+I have successfully generated today's tech news digest and saved the formatted document to /workspace/digest.pdf.
+Done. environment_id=a9e87042e355d0fea85d69567c0346d5
 ```
 
 `environment_id` is now a real value: the sandbox ran with your config files and the agent created `digest.pdf`. The next step downloads it.

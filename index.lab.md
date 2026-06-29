@@ -1,6 +1,6 @@
 ---
 id: managed-agents-gemini-api
-summary: Build a managed agent that fetches live tech news, writes editorial summaries, and generates a PDF, powered by Managed Agents with the Gemini API.
+summary: Build a managed agent that fetches live tech news, writes editorial summaries, and generates a PDF, powered by Managed agents on the Gemini API.
 status: Draft
 authors: Saoussen Chaabnia
 categories: AI, Gemini API
@@ -18,7 +18,7 @@ Duration: 05:00
 
 The AI and tech landscape moves faster than anyone can track. New models, papers, and products drop daily. A digest agent that fetches today's headlines, writes sharp summaries, and generates a PDF every morning would solve that, but building one used to mean picking a framework, defining tools in Python, writing an orchestration loop, packaging a container, and deploying to Cloud Run. All of that before the agent had made a single web request.
 
-Managed Agents with the Gemini API changes the equation. You write two markdown config files and a pre-built renderer script, make one API call, and a real Ubuntu sandbox boots, browses the web, writes your summaries, and generates a PDF. No containers. No deployment. No orchestration code.
+Managed agents on the Gemini API changes the equation. You write two markdown config files and a pre-built renderer script, make one API call, and a real Ubuntu sandbox boots, browses the web, writes your summaries, and generates a PDF. No containers. No deployment. No orchestration code.
 
 In this codelab you will build exactly that agent: from an empty function to a working daily digest, one concept at a time.
 
@@ -38,7 +38,7 @@ In this codelab you will build exactly that agent: from an empty function to a w
 
 ---
 
-## What is Managed Agents with the Gemini API?
+## What is Managed agents on the Gemini API?
 
 Duration: 05:00
 
@@ -208,7 +208,7 @@ GEMINI_API_KEY=your-key-here
 
 > aside negative
 >
-> **Billing required.** The Managed Agents with the Gemini API charges for token usage. Each full digest run costs ~$0.30-$1.30. Environment compute (CPU, memory, sandbox execution) is free during the preview period. The free tier does not cover the Interactions API: add prepay credits at [aistudio.google.com/billing](https://aistudio.google.com/billing).
+> **Billing required.** The Managed agents on the Gemini API charges for token usage. Each full digest run costs ~$0.30-$1.30. Environment compute (CPU, memory, sandbox execution) is free during the preview period. The free tier does not cover the Interactions API: add prepay credits at [aistudio.google.com/billing](https://aistudio.google.com/billing).
 
 ### Install dependencies
 
@@ -293,11 +293,10 @@ You should see live output as the agent works:
 
 ```text
 [agent started]
-  [tool] url_context (https://news.ycombinator.com)
-  [tool] url_context (https://news.ycombinator.com/item?id=...)
-  [tool] run_code (import json...)
-Today's top Hacker News stories...
-Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d
+  [tool] run_code
+Here are the top 5 stories currently on the Hacker News front page:
+...
+Done. environment_id=863e7fa217a54236e278eb61b2e2538c
 ```
 
 The API returns a real `environment_id` even with `environment="remote"`. The sandbox ran. What is missing is config: no voice, no skill, no PDF generator. The agent just printed stories as text and stopped. The next step adds those.
@@ -307,7 +306,7 @@ Each line of output maps to an event from `run_stream()`:
 | `step.type` | What it is | What `run_stream()` prints |
 |---|---|---|
 | `"url_context_call"` | agent fetching a URL | `[tool] url_context (https://...)` |
-| `"code_execution_call"` | agent running code | `[tool] run_code (first line...)` |
+| `"code_execution_call"` | agent running code in the sandbox | `[tool] run_code` |
 | `"google_search_call"` | agent searching the web | `[tool] google_search (query...)` |
 | `"function_call"` | file tools and others | `[tool] read_file (/workspace/...)` |
 | `step.delta` where `delta.type == "text"` | agent writing text | streamed directly to stdout |
@@ -421,11 +420,10 @@ The run now takes 1-3 minutes. You should see the agent reading config files, wr
 
 ```text
 [agent started]
-  [tool] url_context (https://news.ycombinator.com)
-  [tool] url_context (https://techcrunch.com)
-  [tool] run_code (import json...)
+  [tool] run_code
+  [tool] run_code
   [tool] read_file (/workspace/summaries.json)
-  [tool] run_code (import subprocess...)
+  [tool] run_code
 I have successfully created today's tech news digest.
 ...editorial summaries in the configured voice...
 Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d
@@ -703,7 +701,7 @@ You built a managed agent from scratch, one concept at a time. Here is what each
 
 ### ADK + Cloud Run vs. Managed Agents: the difference at a glance
 
-| Capability | ADK + Cloud Run | Managed Agents with the Gemini API |
+| Capability | ADK + Cloud Run | Managed agents on the Gemini API |
 |---|---|---|
 | Provision a sandbox | `docker build` + `gcloud run deploy` | `interactions.create()` |
 | Define tools | Python functions registered with the agent | Built in: web browse, code execution, file system |
@@ -715,5 +713,5 @@ You built a managed agent from scratch, one concept at a time. Here is what each
 
 ### Next steps
 
-- Read the [Managed Agents with the Gemini API documentation](https://ai.google.dev/gemini-api/docs/managed-agents-quickstart)
+- Read the [Managed agents on the Gemini API documentation](https://ai.google.dev/gemini-api/docs/managed-agents-quickstart)
 

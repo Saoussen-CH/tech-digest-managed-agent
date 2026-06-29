@@ -88,8 +88,12 @@ def run_stream(stream) -> tuple[str, str]:
 
         elif event_type == "step.delta":
             delta = getattr(event, "delta", None)
-            if delta and getattr(delta, "type", "") == "text":
-                print(getattr(delta, "text", ""), end="", flush=True)
+            if delta:
+                dtype = getattr(delta, "type", "")
+                if dtype != "text":
+                    print(f"  [debug-delta] type={dtype} delta={vars(delta) if hasattr(delta, '__dict__') else delta}", flush=True)
+                elif dtype == "text":
+                    print(getattr(delta, "text", ""), end="", flush=True)
 
         elif event_type == "interaction.completed":
             interaction = getattr(event, "interaction", None)

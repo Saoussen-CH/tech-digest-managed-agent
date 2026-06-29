@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+digest.pdf
+digest_v2.pdf

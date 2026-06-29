@@ -22,5 +22,6 @@ rm -rf "$DOCS_DIR"
 mkdir -p "$DOCS_DIR"
 cp -r "$CODELAB_ID"/. "$DOCS_DIR"/
 touch "$DOCS_DIR/.nojekyll"
+rm -rf "$CODELAB_ID"
 
 echo "Done. Codelab at docs/index.html"

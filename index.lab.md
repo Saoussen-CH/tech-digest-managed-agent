@@ -331,7 +331,7 @@ The agent had no instructions: no voice, no skill, no PDF generator. In this ste
 
 Make four changes to `run_digest.py`:
 
-**TODO 1:** Below `load_source()`, add the three module-level constants (these sit outside `run_digest()`, at the top of the file):
+**TODO 2:** Below `load_source()`, add the three module-level constants (these sit outside `run_digest()`, at the top of the file):
 
 ```python
 AGENTS_MD       = load_source(".agents/AGENTS.md")

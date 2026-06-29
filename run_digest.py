@@ -27,7 +27,7 @@ def load_source(relative_path: str) -> str:
     return (BASE_DIR / relative_path).read_text(encoding="utf-8")
 
 
-# TODO 1: load AGENTS_MD, SKILL_MD, and GENERATE_PDF_PY using load_source()
+# TODO 2: load AGENTS_MD, SKILL_MD, and GENERATE_PDF_PY using load_source()
 
 
 def run_stream(stream) -> tuple[str, str]:

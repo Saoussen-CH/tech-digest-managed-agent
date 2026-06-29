@@ -53,7 +53,8 @@ def run_stream(stream) -> tuple[str, str]:
                 if stype == "function_call":
                     name = getattr(step, "name", "")
                     if name:
-                        print(f"  [debug] {name} args={args} type={type(args)}", flush=True)
+                        step_dict = vars(step) if hasattr(step, "__dict__") else {}
+                        print(f"  [debug] {name} step_keys={list(step_dict.keys())} step={step_dict}", flush=True)
                         path = None
                         if args:
                             args_dict = (args if isinstance(args, dict)

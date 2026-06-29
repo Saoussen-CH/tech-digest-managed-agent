@@ -429,13 +429,13 @@ Done. environment_id=4129ffd75574e308748e9425d7ec828f
 <h2 is-upgraded>What to fill in</h2>
 <p>Open <code>download_pdf.py</code>. It has two TODOs.</p>
 <p><strong>TODO 1:</strong> fill in the <code>requests.get()</code> call:</p>
-<pre><code language="language-python" class="language-python">r = requests.get(
-    f&#34;https://generativelanguage.googleapis.com/v1beta/files/environment-{environment_id}:download&#34;,
-    params={&#34;alt&#34;: &#34;media&#34;},
-    headers={&#34;x-goog-api-key&#34;: api_key},
-    allow_redirects=True,
-)
-r.raise_for_status()
+<pre><code language="language-python" class="language-python">    r = requests.get(
+        f&#34;https://generativelanguage.googleapis.com/v1beta/files/environment-{environment_id}:download&#34;,
+        params={&#34;alt&#34;: &#34;media&#34;},
+        headers={&#34;x-goog-api-key&#34;: api_key},
+        allow_redirects=True,
+    )
+    r.raise_for_status()
 </code></pre>
 <p>The URL addresses the sandbox snapshot. <code>params={"alt": "media"}</code> returns raw bytes instead of metadata. Your existing <code>GEMINI_API_KEY</code> authenticates the Files API too.</p>
 <p><strong>TODO 2:</strong> extract only the PDF from the tar archive and read its bytes:</p>

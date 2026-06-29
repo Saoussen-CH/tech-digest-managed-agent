@@ -469,13 +469,13 @@ Open `download_pdf.py`. It has two TODOs.
 **TODO 1:** fill in the `requests.get()` call:
 
 ```python
-r = requests.get(
-    f"https://generativelanguage.googleapis.com/v1beta/files/environment-{environment_id}:download",
-    params={"alt": "media"},
-    headers={"x-goog-api-key": api_key},
-    allow_redirects=True,
-)
-r.raise_for_status()
+    r = requests.get(
+        f"https://generativelanguage.googleapis.com/v1beta/files/environment-{environment_id}:download",
+        params={"alt": "media"},
+        headers={"x-goog-api-key": api_key},
+        allow_redirects=True,
+    )
+    r.raise_for_status()
 ```
 
 The URL addresses the sandbox snapshot. `params={"alt": "media"}` returns raw bytes instead of metadata. Your existing `GEMINI_API_KEY` authenticates the Files API too.

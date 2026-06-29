@@ -402,7 +402,7 @@ Each source is a file mounted into the sandbox filesystem at startup before the 
 >
 > Two things to notice here:
 >
-> - **Skill vs AGENTS.md**: `AGENTS.md` is always in the agent's context from the first token: voice, workflow rules, execution constraints. `SKILL.md` loads on demand only when the agent decides the skill is needed for the task. `AGENTS.md` should stay tight; the recommended pattern is to include a short catalog at the bottom that lists available skills so the agent knows what to look for. The `## Skills` table in `AGENTS_MD` above is exactly that: it tells the agent that `digest-pdf` exists, so the harness can load its full `SKILL.md` when the task calls for it.
+> - **Skill vs AGENTS.md**: `AGENTS.md` is always in the agent's context from the first token: voice, workflow rules, execution constraints. `SKILL.md` loads on demand only when the agent decides the skill is needed for the task. `AGENTS.md` should stay tight; the recommended pattern is to include a short catalog at the bottom that lists available skills so the agent knows what to look for. The `## Skills` table in `.agents/AGENTS.md` is exactly that: it tells the agent that `digest-pdf` exists, so the harness can load its full `SKILL.md` when the task calls for it.
 > - **Managed Agents vs ADK**: ADK uses the programmatic route: `load_skill_from_dir("skills/digest-pdf")` then `SkillToolset(skills=[skill])` in Python code. With Managed Agents you use the inline route: mount the file via `environment.sources` and the harness discovers it from `.agents/skills/*/SKILL.md` automatically. No registration code.
 
 ### Verify
@@ -564,6 +564,10 @@ Named agent:    bake once → invoke by ID, no sources
 ### What to fill in
 
 Open `save_agent.py`. It has one TODO.
+
+> aside negative
+>
+> `AGENTS_MD`, `SKILL_MD`, and `GENERATE_PDF_PY` are imported from `run_digest.py`. Make sure you completed the Customize step and added those three loading lines before running this file.
 
 Notice that the constants are imported directly from `run_digest.py` (no duplication):
 

@@ -55,13 +55,14 @@ def run_stream(stream) -> tuple[str, str]:
                     if name:
                         path = None
                         if args:
+                            args_dict = (args if isinstance(args, dict)
+                                         else vars(args) if hasattr(args, "__dict__") else {})
                             for key in ("path", "file_path", "filepath", "directory", "filename", "dir"):
-                                path = (args.get(key) if isinstance(args, dict)
-                                        else getattr(args, key, None))
+                                path = args_dict.get(key)
                                 if path:
                                     break
-                            if not path and isinstance(args, dict):
-                                path = next((v for v in args.values() if isinstance(v, str)), None)
+                            if not path:
+                                path = next((v for v in args_dict.values() if isinstance(v, str)), None)
                         label = f" ({path})" if path else ""
                         print(f"  [tool] {name}{label}", flush=True)
 

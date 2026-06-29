@@ -53,7 +53,11 @@ def run_stream(stream) -> tuple[str, str]:
                 if stype == "function_call":
                     name = getattr(step, "name", "")
                     if name:
-                        print(f"  [tool] {name}", flush=True)
+                        path = (getattr(args, "path", None)
+                                or getattr(args, "directory", None)
+                                or getattr(args, "filename", None)) if args else None
+                        label = f" ({path})" if path else ""
+                        print(f"  [tool] {name}{label}", flush=True)
 
                 elif stype == "url_context_call":
                     urls = getattr(args, "urls", []) if args else []

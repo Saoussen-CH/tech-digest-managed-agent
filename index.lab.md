@@ -239,7 +239,7 @@ cat run_digest.py
 | `"url_context_call"` | agent fetching a URL | `[tool] url_context (https://...)` |
 | `"code_execution_call"` | agent running code | `[tool] run_code (first line...)` |
 | `"google_search_call"` | agent searching the web | `[tool] google_search (query...)` |
-| `"function_call"` | any other tool | `[tool] <name>` |
+| `"function_call"` | file tools and others | `[tool] read_file (/workspace/...)` |
 | `step.delta` where `delta.type == "text"` | agent writing text | streamed directly to stdout |
 
 ### What to add
@@ -418,6 +418,7 @@ The run now takes 1-3 minutes. You should see the agent reading config files, wr
   [tool] url_context (https://news.ycombinator.com)
   [tool] url_context (https://techcrunch.com)
   [tool] run_code (import json...)
+  [tool] read_file (/workspace/summaries.json)
   [tool] run_code (import subprocess...)
 I have successfully created today's tech news digest.
 ...editorial summaries in the configured voice...

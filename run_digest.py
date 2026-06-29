@@ -35,8 +35,11 @@ def run_stream(stream) -> tuple[str, str]:
 
     Returns (environment_id, interaction_id) from the completed event.
     """
+    import json as _json
+
     environment_id = None
     interaction_id = None
+    pending_tool = None  # function_call name waiting for arguments_delta
 
     for event in stream:
         event_type = getattr(event, "event_type", None)
@@ -45,6 +48,10 @@ def run_stream(stream) -> tuple[str, str]:
             print("[agent started]", flush=True)
 
         elif event_type == "step.start":
+            if pending_tool:
+                print(flush=True)
+                pending_tool = None
+
             step = getattr(event, "step", None)
             if step:
                 stype = getattr(step, "type", "")
@@ -53,20 +60,8 @@ def run_stream(stream) -> tuple[str, str]:
                 if stype == "function_call":
                     name = getattr(step, "name", "")
                     if name:
-                        step_dict = vars(step) if hasattr(step, "__dict__") else {}
-                        print(f"  [debug] {name} step_keys={list(step_dict.keys())} step={step_dict}", flush=True)
-                        path = None
-                        if args:
-                            args_dict = (args if isinstance(args, dict)
-                                         else vars(args) if hasattr(args, "__dict__") else {})
-                            for key in ("path", "file_path", "filepath", "directory", "filename", "dir"):
-                                path = args_dict.get(key)
-                                if path:
-                                    break
-                            if not path:
-                                path = next((v for v in args_dict.values() if isinstance(v, str)), None)
-                        label = f" ({path})" if path else ""
-                        print(f"  [tool] {name}{label}", flush=True)
+                        print(f"  [tool] {name}", end="", flush=True)
+                        pending_tool = name
 
                 elif stype == "url_context_call":
                     urls = getattr(args, "urls", []) if args else []
@@ -74,13 +69,7 @@ def run_stream(stream) -> tuple[str, str]:
                     print(f"  [tool] url_context ({label})", flush=True)
 
                 elif stype == "code_execution_call":
-                    code = None
-                    if args:
-                        code = (getattr(args, "code", None)
-                                or getattr(args, "input", None)
-                                or getattr(args, "source", None))
-                    label = code.split("\n")[0][:60] if code else ""
-                    print(f"  [tool] run_code ({label})" if label else "  [tool] run_code", flush=True)
+                    print("  [tool] run_code", flush=True)
 
                 elif stype == "google_search_call":
                     queries = getattr(args, "queries", []) if args else []
@@ -91,9 +80,18 @@ def run_stream(stream) -> tuple[str, str]:
             delta = getattr(event, "delta", None)
             if delta:
                 dtype = getattr(delta, "type", "")
-                if dtype != "text":
-                    print(f"  [debug-delta] type={dtype} delta={vars(delta) if hasattr(delta, '__dict__') else delta}", flush=True)
+                if dtype == "arguments_delta" and pending_tool:
+                    try:
+                        args_dict = _json.loads(getattr(delta, "arguments", "") or "{}")
+                        path = args_dict.get("path") or args_dict.get("directory") or args_dict.get("file_path")
+                        print(f" ({path})" if path else "", flush=True)
+                    except Exception:
+                        print(flush=True)
+                    pending_tool = None
                 elif dtype == "text":
+                    if pending_tool:
+                        print(flush=True)
+                        pending_tool = None
                     print(getattr(delta, "text", ""), end="", flush=True)
 
         elif event_type == "interaction.completed":

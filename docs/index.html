@@ -213,40 +213,15 @@ cd tech-digest-managed-agent
     
       <google-codelab-step label="Make Your First Agent Call" duration="10">
         <h2 is-upgraded>Open the starter file</h2>
-<pre><code language="language-bash" class="language-bash">cat run_digest.py
+<pre><code language="language-bash" class="language-bash">cloudshell edit run_digest.py
 </code></pre>
+<aside class="special"><p><strong>Local setup:</strong> open <code>run_digest.py</code> in your editor of choice.</p>
+</aside>
 <p><code>run_digest()</code> is a stub (just <code>pass</code>). Two helpers are already pre-filled above it:</p>
 <ul>
-<li><code>load_source(path)</code>: reads a file from <code>.agents/</code> relative to the script. Open the files in <code>.agents/</code> to read the editorial voice, PDF playbook, and pre-built renderer. You will load them in the next exercise.</li>
-<li><code>run_stream(stream)</code>: processes the event stream and returns <code>(environment_id, interaction_id)</code>. You do not need to write the event loop yourself, but read through it to understand what each event type carries.</li>
+<li><code>load_source(path)</code>: reads a file from <code>.agents/</code> relative to the script. You will use it in the next exercise to mount the editorial voice, PDF playbook, and renderer into the sandbox.</li>
+<li><code>run_stream(stream)</code>: processes the event stream and returns <code>(environment_id, interaction_id)</code>. You do not need to write the event loop yourself.</li>
 </ul>
-<p><strong>The event loop</strong> inside <code>run_stream()</code> dispatches on <code>event.event_type</code> and <code>step.type</code>:</p>
-<table>
-<tr><td colspan="1" rowspan="1"><p><code>step.type</code></p>
-</td><td colspan="1" rowspan="1"><p>What it is</p>
-</td><td colspan="1" rowspan="1"><p>What <code>run_stream()</code> prints</p>
-</td></tr>
-<tr><td colspan="1" rowspan="1"><p><code>"url_context_call"</code></p>
-</td><td colspan="1" rowspan="1"><p>agent fetching a URL</p>
-</td><td colspan="1" rowspan="1"><p><code>[tool] url_context (https://...)</code></p>
-</td></tr>
-<tr><td colspan="1" rowspan="1"><p><code>"code_execution_call"</code></p>
-</td><td colspan="1" rowspan="1"><p>agent running code</p>
-</td><td colspan="1" rowspan="1"><p><code>[tool] run_code (first line...)</code></p>
-</td></tr>
-<tr><td colspan="1" rowspan="1"><p><code>"google_search_call"</code></p>
-</td><td colspan="1" rowspan="1"><p>agent searching the web</p>
-</td><td colspan="1" rowspan="1"><p><code>[tool] google_search (query...)</code></p>
-</td></tr>
-<tr><td colspan="1" rowspan="1"><p><code>"function_call"</code></p>
-</td><td colspan="1" rowspan="1"><p>file tools and others</p>
-</td><td colspan="1" rowspan="1"><p><code>[tool] read_file (/workspace/...)</code></p>
-</td></tr>
-<tr><td colspan="1" rowspan="1"><p><code>step.delta</code> where <code>delta.type == "text"</code></p>
-</td><td colspan="1" rowspan="1"><p>agent writing text</p>
-</td><td colspan="1" rowspan="1"><p>streamed directly to stdout</p>
-</td></tr>
-</table>
 <h2 is-upgraded>What to add</h2>
 <p>Replace <code>pass</code> with:</p>
 <pre><code language="language-python" class="language-python">    from google import genai
@@ -307,6 +282,33 @@ Today&#39;s top Hacker News stories...
 Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d
 </code></pre>
 <p>The API returns a real <code>environment_id</code> even with <code>environment="remote"</code>. The sandbox ran. What is missing is config: no voice, no skill, no PDF generator. The agent just printed stories as text and stopped. The next step adds those.</p>
+<p>Each line of output maps to an event from <code>run_stream()</code>:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><code>step.type</code></p>
+</td><td colspan="1" rowspan="1"><p>What it is</p>
+</td><td colspan="1" rowspan="1"><p>What <code>run_stream()</code> prints</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>"url_context_call"</code></p>
+</td><td colspan="1" rowspan="1"><p>agent fetching a URL</p>
+</td><td colspan="1" rowspan="1"><p><code>[tool] url_context (https://...)</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>"code_execution_call"</code></p>
+</td><td colspan="1" rowspan="1"><p>agent running code</p>
+</td><td colspan="1" rowspan="1"><p><code>[tool] run_code (first line...)</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>"google_search_call"</code></p>
+</td><td colspan="1" rowspan="1"><p>agent searching the web</p>
+</td><td colspan="1" rowspan="1"><p><code>[tool] google_search (query...)</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>"function_call"</code></p>
+</td><td colspan="1" rowspan="1"><p>file tools and others</p>
+</td><td colspan="1" rowspan="1"><p><code>[tool] read_file (/workspace/...)</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>step.delta</code> where <code>delta.type == "text"</code></p>
+</td><td colspan="1" rowspan="1"><p>agent writing text</p>
+</td><td colspan="1" rowspan="1"><p>streamed directly to stdout</p>
+</td></tr>
+</table>
 
 
       </google-codelab-step>

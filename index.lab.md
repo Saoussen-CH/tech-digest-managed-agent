@@ -224,23 +224,17 @@ Duration: 10:00
 ### Open the starter file
 
 ```bash
-cat run_digest.py
+cloudshell edit run_digest.py
 ```
+
+> aside positive
+>
+> **Local setup:** open `run_digest.py` in your editor of choice.
 
 `run_digest()` is a stub (just `pass`). Two helpers are already pre-filled above it:
 
-- `load_source(path)`: reads a file from `.agents/` relative to the script. Open the files in `.agents/` to read the editorial voice, PDF playbook, and pre-built renderer. You will load them in the next exercise.
-- `run_stream(stream)`: processes the event stream and returns `(environment_id, interaction_id)`. You do not need to write the event loop yourself, but read through it to understand what each event type carries.
-
-**The event loop** inside `run_stream()` dispatches on `event.event_type` and `step.type`:
-
-| `step.type` | What it is | What `run_stream()` prints |
-|---|---|---|
-| `"url_context_call"` | agent fetching a URL | `[tool] url_context (https://...)` |
-| `"code_execution_call"` | agent running code | `[tool] run_code (first line...)` |
-| `"google_search_call"` | agent searching the web | `[tool] google_search (query...)` |
-| `"function_call"` | file tools and others | `[tool] read_file (/workspace/...)` |
-| `step.delta` where `delta.type == "text"` | agent writing text | streamed directly to stdout |
+- `load_source(path)`: reads a file from `.agents/` relative to the script. You will use it in the next exercise to mount the editorial voice, PDF playbook, and renderer into the sandbox.
+- `run_stream(stream)`: processes the event stream and returns `(environment_id, interaction_id)`. You do not need to write the event loop yourself.
 
 ### What to add
 
@@ -306,6 +300,16 @@ Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d
 ```
 
 The API returns a real `environment_id` even with `environment="remote"`. The sandbox ran. What is missing is config: no voice, no skill, no PDF generator. The agent just printed stories as text and stopped. The next step adds those.
+
+Each line of output maps to an event from `run_stream()`:
+
+| `step.type` | What it is | What `run_stream()` prints |
+|---|---|---|
+| `"url_context_call"` | agent fetching a URL | `[tool] url_context (https://...)` |
+| `"code_execution_call"` | agent running code | `[tool] run_code (first line...)` |
+| `"google_search_call"` | agent searching the web | `[tool] google_search (query...)` |
+| `"function_call"` | file tools and others | `[tool] read_file (/workspace/...)` |
+| `step.delta` where `delta.type == "text"` | agent writing text | streamed directly to stdout |
 
 ---
 

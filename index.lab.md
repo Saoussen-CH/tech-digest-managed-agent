@@ -178,13 +178,13 @@ Duration: 05:00
 
 Click the button below to open this codelab in Google Cloud Shell. All dependencies are pre-installed.
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/Saoussen-CH/managed-agents-codelab&cloudshell_git_branch=codelab-restructure&cloudshell_workspace=codelab/standalone)
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/Saoussen-CH/tech-digest-managed-agent)
 
 ### Option B: Local setup
 
 ```bash
-git clone -b codelab-restructure https://github.com/Saoussen-CH/managed-agents-codelab.git
-cd managed-agents-codelab/codelab/standalone
+git clone https://github.com/Saoussen-CH/tech-digest-managed-agent.git
+cd tech-digest-managed-agent
 ```
 
 Install `uv` if needed:
@@ -212,8 +212,14 @@ GEMINI_API_KEY=your-key-here
 ### Install dependencies
 
 ```bash
-uv pip install google-genai python-dotenv
+uv sync
 ```
+
+---
+
+## Make Your First Agent Call
+
+Duration: 10:00
 
 ### Open the starter file
 
@@ -222,14 +228,6 @@ cat run_digest.py
 ```
 
 `run_digest()` is a stub (just `pass`). Before starting, look at the top of the file: `AGENTS_MD`, `SKILL_MD`, and `GENERATE_PDF_PY` are loaded from the `.agents/` directory using `Path.read_text()`. Open those files to read the editorial voice, the PDF playbook, and the pre-built renderer the agent will use. You will build `run_digest()` across the first two exercises. The remaining exercises each introduce a separate file (`download_pdf.py`, `refine_digest.py`, `save_agent.py`).
-
----
-
-## Make Your First Agent Call
-
-Duration: 10:00
-
-Open `run_digest.py`. You will replace `pass` inside `run_digest()` with real code throughout this codelab. Each step adds one capability.
 
 `run_stream()` is already pre-filled at the top of the file. It processes the event stream and returns `(environment_id, interaction_id)`. You do not need to write the event loop yourself, but read through it to understand what each event type carries.
 

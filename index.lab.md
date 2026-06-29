@@ -428,18 +428,15 @@ The run now takes 1-3 minutes. You should see the agent reading config files, wr
 
 ```text
 [agent started]
-  [tool] read_file
-  [tool] list_files
+  [tool] read_file (/.agents/skills/digest-pdf/SKILL.md)
+  [tool] list_files (/.agents/skills/digest-pdf/scripts)
+  [tool] read_file (/.agents/skills/digest-pdf/scripts/generate_pdf.py)
   [tool] run_code
+  [tool] write_file (/workspace/summaries.json)
   [tool] run_code
-  [tool] write_file
-  [tool] run_code
-  [tool] write_file
-  [tool] run_code
-  [tool] run_code
-  [tool] run_code
+  [tool] delete_file (/tmp/test_scrape.py)
 I have successfully generated today's tech news digest and saved the formatted document to /workspace/digest.pdf.
-Done. environment_id=a9e87042e355d0fea85d69567c0346d5
+Done. environment_id=4129ffd75574e308748e9425d7ec828f
 ```
 
 `environment_id` is now a real value: the sandbox ran with your config files and the agent created `digest.pdf`. The next step downloads it.

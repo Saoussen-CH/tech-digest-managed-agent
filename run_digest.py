@@ -64,17 +64,15 @@ def run_stream(stream) -> tuple[str, str]:
                         pending_tool = name
 
                 elif stype == "url_context_call":
-                    urls = getattr(args, "urls", []) if args else []
-                    label = urls[0] if urls else "url"
-                    print(f"  [tool] url_context ({label})", flush=True)
+                    print("  [tool] url_context", end="", flush=True)
+                    pending_tool = "url_context"
 
                 elif stype == "code_execution_call":
                     print("  [tool] run_code", flush=True)
 
                 elif stype == "google_search_call":
-                    queries = getattr(args, "queries", []) if args else []
-                    label = queries[0] if queries else ""
-                    print(f"  [tool] google_search ({label})" if label else "  [tool] google_search", flush=True)
+                    print("  [tool] google_search", end="", flush=True)
+                    pending_tool = "google_search"
 
         elif event_type == "step.delta":
             delta = getattr(event, "delta", None)
@@ -83,8 +81,16 @@ def run_stream(stream) -> tuple[str, str]:
                 if dtype == "arguments_delta" and pending_tool:
                     try:
                         args_dict = _json.loads(getattr(delta, "arguments", "") or "{}")
-                        path = args_dict.get("path") or args_dict.get("directory") or args_dict.get("file_path")
-                        print(f" ({path})" if path else "", flush=True)
+                        if pending_tool == "google_search":
+                            queries = args_dict.get("queries", [])
+                            label = queries[0] if queries else None
+                        elif pending_tool == "url_context":
+                            urls = args_dict.get("urls", [])
+                            label = urls[0] if urls else None
+                        else:
+                            label = (args_dict.get("path") or args_dict.get("directory")
+                                     or args_dict.get("file_path"))
+                        print(f" ({label})" if label else "", flush=True)
                     except Exception:
                         print(flush=True)
                     pending_tool = None

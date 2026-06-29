@@ -12,14 +12,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 CODELAB_ID="managed-agents-gemini-api"
+DOCS_DIR="$SCRIPT_DIR/../docs"
 
 rm -rf "$CODELAB_ID"
 /home/saoussen/go/bin/claat export index.lab.md
 
 echo "Copying to docs/..."
-rm -rf docs
-mkdir -p docs
-cp -r "$CODELAB_ID"/. docs/
-touch docs/.nojekyll
+rm -rf "$DOCS_DIR"
+mkdir -p "$DOCS_DIR"
+cp -r "$CODELAB_ID"/. "$DOCS_DIR"/
+touch "$DOCS_DIR/.nojekyll"
 
 echo "Done. Codelab at docs/index.html"

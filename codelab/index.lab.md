@@ -314,7 +314,7 @@ Each line of output maps to an event from `run_stream()`:
 |---|---|---|
 | `"url_context_call"` | agent fetching a URL | `[tool] url_context (https://...)` |
 | `"code_execution_call"` | agent running code in the sandbox | `[tool] run_code` |
-| `"google_search_call"` | agent searching the web | `[tool] google_search (query...)` |
+| `"google_search_call"` | agent searching the web | `[tool] google_search` |
 | `"function_call"` | file tools and others | `[tool] read_file (/workspace/...)` |
 | `step.delta` where `delta.type == "text"` | agent writing text | streamed directly to stdout |
 

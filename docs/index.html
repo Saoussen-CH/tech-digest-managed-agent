@@ -1,0 +1,673 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Build a Managed Tech Digest Agent with the Gemini API</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  codelab-ga4id=""
+                  id="managed-agents-gemini-api"
+                  title="Build a Managed Tech Digest Agent with the Gemini API"
+                  environment="web"
+                  feedback-link="https://github.com/googlecodelabs/feedback/issues/new?title=[managed-agents-gemini-api]">
+    
+      <google-codelab-step label="Overview" duration="5">
+        <p>The AI and tech landscape moves faster than anyone can track. New models, papers, and products drop daily. A digest agent that fetches today&#39;s headlines, writes sharp summaries, and generates a PDF every morning would solve that, but building one used to mean picking a framework, defining tools in Python, writing an orchestration loop, packaging a container, and deploying to Cloud Run. All of that before the agent had made a single web request.</p>
+<p>Managed Agents with the Gemini API changes the equation. You write two markdown config files and a pre-built renderer script, make one API call, and a real Ubuntu sandbox boots, browses the web, writes your summaries, and generates a PDF. No containers. No deployment. No orchestration code.</p>
+<p>In this codelab you will build exactly that agent: from an empty function to a working daily digest, one concept at a time.</p>
+<h2 is-upgraded>What you will build</h2>
+<ul>
+<li>Create and run your first managed agent in a real Linux sandbox</li>
+<li>Customize the agent with detailed instructions</li>
+<li>Download the PDF output of the agent</li>
+<li>Continue the conversation to refine the digest without re-fetching the web</li>
+<li>Save the agent config and invoke it by ID in future runs</li>
+</ul>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>Python 3.10+</li>
+<li>A Gemini API key with billing enabled: <a href="https://aistudio.google.com/api-keys" target="_blank">aistudio.google.com/api-keys</a></li>
+<li>~$1 of API credit (each full run costs $0.30-$1.30)</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="What is Managed Agents with the Gemini API?" duration="5">
+        <h2 is-upgraded>Three levels of AI systems</h2>
+<p>Before diving into code, here is where Managed Agents fits relative to the two alternatives:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Level</p>
+</td><td colspan="1" rowspan="1"><p>What It Is</p>
+</td><td colspan="1" rowspan="1"><p>Who Manages Infrastructure?</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Standard LLM</strong></p>
+</td><td colspan="1" rowspan="1"><p>You prompt, it replies with text. No hands, no memory, no internet.</p>
+</td><td colspan="1" rowspan="1"><p>N/A: it cannot do anything on its own</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Self-Hosted Agent</strong></p>
+</td><td colspan="1" rowspan="1"><p>You wire up ADK/LangChain/AutoGen + Docker + tools + memory.</p>
+</td><td colspan="1" rowspan="1"><p>You: all of it (or a managed platform like Agent Engine)</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><strong>Managed Agent</strong></p>
+</td><td colspan="1" rowspan="1"><p>You give it a goal. Google provisions a secure sandbox. The agent writes code, runs it, reads errors, searches the web, and fixes bugs autonomously.</p>
+</td><td colspan="1" rowspan="1"><p>Google: all of it</p>
+</td></tr>
+</table>
+<p>This codelab is about the third row. You supply a task and configuration files. Google handles everything else.</p>
+<h2 is-upgraded>What you would build with ADK + Cloud Run</h2>
+<p>To build a news digest agent that browses the web, runs Python, and generates a PDF, you would need all of this with ADK + Cloud Run:</p>
+<pre><code language="language-python" class="language-python"># agent.py: define tools and wire up the agent
+from google.adk.agents import LlmAgent
+from google.adk.tools import google_search, built_in_code_execution
+
+agent = LlmAgent(
+    name=&#34;digest-agent&#34;,
+    model=&#34;gemini-2.0-flash&#34;,
+    instruction=AGENTS_MD,          # your editorial voice and rules
+    tools=[google_search, built_in_code_execution],
+)
+</code></pre>
+<pre><code language="language-python" class="language-python"># app.py: serve the agent over HTTP
+from google.adk.runners import FastApiRunner
+runner = FastApiRunner(agent=agent)
+app = runner.app
+</code></pre>
+<pre><code language="language-python" class="language-python"># pdf_tool.py: custom tool, install reportlab, render PDF
+# scraper.py: custom tool, fetch each news source
+# streaming.py: wire agent events to your SSE endpoint
+</code></pre>
+<pre><code language="language-dockerfile" class="language-dockerfile"># Dockerfile: package everything
+FROM python:3.12
+COPY . /app
+RUN pip install google-adk reportlab requests
+CMD [&#34;uvicorn&#34;, &#34;app:app&#34;, &#34;--host&#34;, &#34;0.0.0.0&#34;]
+</code></pre>
+<pre><code language="language-bash" class="language-bash"># Deploy to Cloud Run
+gcloud run deploy digest-agent \
+  --image gcr.io/your-project/digest-agent \
+  --set-secrets GEMINI_API_KEY=gemini-key:latest \
+  --memory 2Gi
+</code></pre>
+<p>That is before the agent has run once. You still own sandbox isolation (so the agent cannot damage your server), package installation, state management between tool calls, and the streaming infrastructure to get events to a client.</p>
+<h2 is-upgraded>What Managed Agents replaces it with</h2>
+<pre><code language="language-python" class="language-python">from google import genai
+client = genai.Client()
+
+stream = client.interactions.create(
+    agent=&#34;antigravity-preview-05-2026&#34;,
+    input=PROMPT,
+    stream=True,
+    environment={
+        &#34;type&#34;: &#34;remote&#34;,
+        &#34;sources&#34;: [          # your config files, mounted at startup
+            {
+                &#34;type&#34;: &#34;inline&#34;,
+                &#34;target&#34;: &#34;.agents/AGENTS.md&#34;,
+                &#34;content&#34;: AGENTS_MD,
+            },
+            {
+                &#34;type&#34;: &#34;inline&#34;,
+                &#34;target&#34;: &#34;.agents/skills/digest-pdf/SKILL.md&#34;,
+                &#34;content&#34;: SKILL_MD,
+            },
+            {
+                &#34;type&#34;: &#34;inline&#34;,
+                &#34;target&#34;: &#34;.agents/skills/digest-pdf/scripts/generate_pdf.py&#34;,
+                &#34;content&#34;: GENERATE_PDF_PY,
+            },
+        ],
+    },
+)
+</code></pre>
+<table>
+<tr><td colspan="1" rowspan="1"><p>What ADK + Cloud Run requires</p>
+</td><td colspan="1" rowspan="1"><p>What Managed Agents handles for you</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Container image + Dockerfile + CI/CD</p>
+</td><td colspan="1" rowspan="1"><p>Fully managed Ubuntu sandbox (Python 3.12, Node 22, 4 CPU / 16 GB RAM)</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Cloud Run deployment + scaling</p>
+</td><td colspan="1" rowspan="1"><p>Provisioned per interaction, auto-expires after 7 days of inactivity</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Sandbox isolation</p>
+</td><td colspan="1" rowspan="1"><p>Isolated per interaction</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Custom PDF tool + <code>pip install</code></p>
+</td><td colspan="1" rowspan="1"><p>Agent installs packages inside the sandbox</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>SSE streaming infrastructure</p>
+</td><td colspan="1" rowspan="1"><p><code>stream=True</code> returns an event iterable</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Tool definitions in Python</p>
+</td><td colspan="1" rowspan="1"><p>Tools built in: web browse, code execution, file system</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>State management between tool calls</p>
+</td><td colspan="1" rowspan="1"><p>Built into the agent reasoning loop</p>
+</td></tr>
+</table>
+<p>You write configuration files (<code>AGENTS.md</code>, <code>SKILL.md</code>, a pre-built script) and make one API call. Google handles everything else.</p>
+<h2 is-upgraded>How the sandbox works</h2>
+<pre><code language="language-text" class="language-text">interactions.create() call
+        │
+        ▼
+Google provisions Ubuntu sandbox (Python 3.12, Node 22, 4 CPU / 16 GB RAM)
+        │
+        ▼
+Agent reasoning loop:
+  plan → fetch URLs → run Python → write files → reason → repeat
+        │
+        ▼
+Events stream back in real time: tool calls, text chunks, completion
+        │
+        ▼
+interaction.completed → environment_id + interaction_id
+</code></pre>
+<p>The sandbox persists for 7 days of inactivity. You can resume it with <code>environment_id</code> to refine the output, run follow-up tasks, or fork it into a saved named agent.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Set Up" duration="5">
+        <h2 is-upgraded>Option A: Cloud Shell (recommended)</h2>
+<p>Click the button below to open this codelab in Google Cloud Shell. All dependencies are pre-installed.</p>
+<p><a href="https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/Saoussen-CH/tech-digest-managed-agent" target="_blank">Open in Cloud Shell</a></p>
+<h2 is-upgraded>Option B: Local setup</h2>
+<pre><code language="language-bash" class="language-bash">git clone https://github.com/Saoussen-CH/tech-digest-managed-agent.git
+cd tech-digest-managed-agent
+</code></pre>
+<p>Install <code>uv</code> if needed:</p>
+<pre><code language="language-bash" class="language-bash">curl -LsSf https://astral.sh/uv/install.sh | sh
+</code></pre>
+<h2 is-upgraded>Configure your API key</h2>
+<pre><code language="language-bash" class="language-bash">cp .env.example .env
+</code></pre>
+<p>Open <code>.env</code> and add your key:</p>
+<pre><code language="language-text" class="language-text">GEMINI_API_KEY=your-key-here
+</code></pre>
+<aside class="warning"><p><strong>Billing required.</strong> The Managed Agents with the Gemini API charges for token usage. Each full digest run costs ~$0.30-$1.30. Environment compute (CPU, memory, sandbox execution) is free during the preview period. The free tier does not cover the Interactions API: add prepay credits at <a href="https://aistudio.google.com/billing" target="_blank">aistudio.google.com/billing</a>.</p>
+</aside>
+<h2 is-upgraded>Install dependencies</h2>
+<pre><code language="language-bash" class="language-bash">uv sync
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Make Your First Agent Call" duration="10">
+        <h2 is-upgraded>Open the starter file</h2>
+<pre><code language="language-bash" class="language-bash">cat run_digest.py
+</code></pre>
+<p><code>run_digest()</code> is a stub (just <code>pass</code>). Two helpers are already pre-filled above it:</p>
+<ul>
+<li><code>load_source(path)</code>: reads a file from <code>.agents/</code> relative to the script. Open the files in <code>.agents/</code> to read the editorial voice, PDF playbook, and pre-built renderer. You will load them in the next exercise.</li>
+<li><code>run_stream(stream)</code>: processes the event stream and returns <code>(environment_id, interaction_id)</code>. You do not need to write the event loop yourself, but read through it to understand what each event type carries.</li>
+</ul>
+<p><strong>The event loop</strong> inside <code>run_stream()</code> dispatches on <code>event.event_type</code> and <code>step.type</code>:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p><code>step.type</code></p>
+</td><td colspan="1" rowspan="1"><p>What it is</p>
+</td><td colspan="1" rowspan="1"><p>What <code>run_stream()</code> prints</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>"url_context_call"</code></p>
+</td><td colspan="1" rowspan="1"><p>agent fetching a URL</p>
+</td><td colspan="1" rowspan="1"><p><code>[tool] url_context (https://...)</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>"code_execution_call"</code></p>
+</td><td colspan="1" rowspan="1"><p>agent running code</p>
+</td><td colspan="1" rowspan="1"><p><code>[tool] run_code (first line...)</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>"google_search_call"</code></p>
+</td><td colspan="1" rowspan="1"><p>agent searching the web</p>
+</td><td colspan="1" rowspan="1"><p><code>[tool] google_search (query...)</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>"function_call"</code></p>
+</td><td colspan="1" rowspan="1"><p>file tools and others</p>
+</td><td colspan="1" rowspan="1"><p><code>[tool] read_file (/workspace/...)</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>step.delta</code> where <code>delta.type == "text"</code></p>
+</td><td colspan="1" rowspan="1"><p>agent writing text</p>
+</td><td colspan="1" rowspan="1"><p>streamed directly to stdout</p>
+</td></tr>
+</table>
+<h2 is-upgraded>What to add</h2>
+<p>Replace <code>pass</code> with:</p>
+<pre><code language="language-python" class="language-python">    from google import genai
+    client = genai.Client()
+
+    stream = client.interactions.create(
+        agent=BASE_AGENT,
+        input=&#34;Fetch the Hacker News front page and list the top 5 stories.&#34;,
+        stream=True,
+        environment=&#34;remote&#34;,
+    )
+
+    environment_id, interaction_id = run_stream(stream)
+    print(f&#34;\nDone. environment_id={environment_id}&#34;)
+</code></pre>
+<h2 is-upgraded>What each part does</h2>
+<p><code>genai.Client()</code> reads <code>GEMINI_API_KEY</code> from the environment. Everything else goes through this client.</p>
+<p><code>interactions.create()</code> is the core call. Four parameters make it work:</p>
+<ul>
+<li><strong><code>agent=BASE_AGENT</code></strong>: selects the Antigravity agent (<code>antigravity-preview-05-2026</code>). One call provisions a fully managed Ubuntu environment with Python 3.12, Node 22, git, pip, and curl pre-installed. No container to build, no deployment to run.</li>
+<li><strong><code>input</code></strong>: the task for this run. The agent browses Hacker News and reasons about the results.</li>
+<li><strong><code>environment="remote"</code></strong>: provisions a fresh cloud sandbox for this interaction.</li>
+<li><strong><code>stream=True</code></strong>: returns an iterable of events instead of blocking. Without it, the call waits 30-90 seconds and returns all output at once as <code>interaction.output_text</code>. With streaming you see the agent reason and act as it happens. Streaming is not an advanced feature here: it is the right default, because a 90-second black box gives you no signal about whether the agent is working or stuck.</li>
+</ul>
+<p><strong>What you just provisioned:</strong> every <code>interactions.create()</code> call boots a dedicated sandbox:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Component</p>
+</td><td colspan="1" rowspan="1"><p>Specification</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Operating System</p>
+</td><td colspan="1" rowspan="1"><p>Isolated Ubuntu Linux environment</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Pre-installed Runtimes</p>
+</td><td colspan="1" rowspan="1"><p>Python 3.12, Node.js 22, Bash</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Compute</p>
+</td><td colspan="1" rowspan="1"><p>4 CPU cores, 16 GB RAM</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Context Management</p>
+</td><td colspan="1" rowspan="1"><p>Auto-compaction triggers at ~135k tokens</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Networking</p>
+</td><td colspan="1" rowspan="1"><p>Outbound web access via Egress Proxy</p>
+</td></tr>
+</table>
+<p>The agent can install any package with <code>pip</code> or <code>npm</code>, read and write files, and make outbound web requests. Your machine and credentials are never touched.</p>
+<p><strong><code>environment_id</code></strong> is a handle to the sandbox that just ran. After <code>interaction.completed</code>, the sandbox does not shut down: it stays alive for up to 7 days. The <code>environment_id</code> is how you get back to it. Pass it to a second <code>interactions.create()</code> call and the agent resumes on the same filesystem, with the same files and installed packages, as if it never left. The next step uses it to download the PDF without re-running the agent, and the step after that uses it to continue the conversation.</p>
+<p><strong><code>interaction_id</code></strong> is a handle to the conversation turn that just completed. Pass it as <code>previous_interaction_id</code> in the next call and the agent has full memory of what it said and did in this turn.</p>
+<h2 is-upgraded>Verify</h2>
+<pre><code language="language-bash" class="language-bash">uv run python run_digest.py
+</code></pre>
+<p>You should see live output as the agent works:</p>
+<pre><code language="language-text" class="language-text">[agent started]
+  [tool] url_context (https://news.ycombinator.com)
+  [tool] url_context (https://news.ycombinator.com/item?id=...)
+  [tool] run_code (import json...)
+Today&#39;s top Hacker News stories...
+Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d
+</code></pre>
+<p>The API returns a real <code>environment_id</code> even with <code>environment="remote"</code>. The sandbox ran. What is missing is config: no voice, no skill, no PDF generator. The agent just printed stories as text and stopped. The next step adds those.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Customize the Agent" duration="8">
+        <p>The agent had no instructions: no voice, no skill, no PDF generator. In this step you load the configuration files from <code>.agents/</code> and mount them into the sandbox.</p>
+<aside class="special"><p><strong>This is the fastest way to build a custom agent.</strong> You are customizing the Antigravity agent for this run without registering anything. The next step shows how to bake this configuration permanently into a named agent so you never pass sources again.</p>
+</aside>
+<h2 is-upgraded>What to change</h2>
+<p>Make four changes to <code>run_digest.py</code>:</p>
+<ol type="1">
+<li>Below <code>load_source()</code>, add the three module-level constants (these sit outside <code>run_digest()</code>, at the top of the file):</li>
+</ol>
+<pre><code language="language-python" class="language-python">AGENTS_MD       = load_source(&#34;.agents/AGENTS.md&#34;)
+SKILL_MD        = load_source(&#34;.agents/skills/digest-pdf/SKILL.md&#34;)
+GENERATE_PDF_PY = load_source(&#34;.agents/skills/digest-pdf/scripts/generate_pdf.py&#34;)
+</code></pre>
+<p>Open each file to see what you are loading: <code>AGENTS.md</code> sets the editorial voice and workflow rules; <code>SKILL.md</code> is the step-by-step PDF playbook; <code>generate_pdf.py</code> is the pre-built renderer the agent will run.</p>
+<aside class="special"><p><strong>Why </strong><strong><code>PROMPT</code></strong><strong>? </strong><code>AGENTS.md</code> and <code>SKILL.md</code> tell the agent HOW to generate a digest, but the agent still needs a trigger to know WHEN to start and WHERE to save the file. <code>PROMPT</code> provides that: it activates the skill and specifies the output path. Without it the agent has no task to begin.</p>
+</aside>
+<p>Now make three changes inside <code>run_digest()</code>:</p>
+<ol type="1" start="2">
+<li>Change <code>input</code> to <code>PROMPT</code></li>
+<li>Change <code>environment</code> from <code>"remote"</code> to:</li>
+</ol>
+<pre><code language="language-python" class="language-python">        environment={
+            &#34;type&#34;: &#34;remote&#34;,
+            &#34;sources&#34;: [
+                {
+                    &#34;type&#34;: &#34;inline&#34;,
+                    &#34;target&#34;: &#34;.agents/AGENTS.md&#34;,
+                    &#34;content&#34;: AGENTS_MD,
+                },
+                {
+                    &#34;type&#34;: &#34;inline&#34;,
+                    &#34;target&#34;: &#34;.agents/skills/digest-pdf/SKILL.md&#34;,
+                    &#34;content&#34;: SKILL_MD,
+                },
+                {
+                    &#34;type&#34;: &#34;inline&#34;,
+                    &#34;target&#34;: &#34;.agents/skills/digest-pdf/scripts/generate_pdf.py&#34;,
+                    &#34;content&#34;: GENERATE_PDF_PY,
+                },
+            ],
+        },
+</code></pre>
+<ol type="1" start="4">
+<li>Add these lines right after <code>print(f"\nDone. environment_id={environment_id}")</code>:</li>
+</ol>
+<pre><code language="language-python" class="language-python">    set_key(&#34;.env&#34;, &#34;ENVIRONMENT_ID&#34;, environment_id)
+    set_key(&#34;.env&#34;, &#34;INTERACTION_ID&#34;, interaction_id)
+</code></pre>
+<p>(<code>set_key</code> is already imported at the top of <code>run_digest.py</code>.)</p>
+<p>This writes both IDs to <code>.env</code> during this run, so the next step can download the PDF without re-running the agent.</p>
+<h2 is-upgraded>What each source does</h2>
+<p>Each source is a file mounted into the sandbox filesystem at startup before the agent runs. The <code>target</code> paths match where the Antigravity harness expects to find them:</p>
+<pre><code>.agents/
+├── AGENTS.md                              ← auto-loaded as global instructions
+└── skills/
+    └── digest-pdf/
+        ├── SKILL.md                       ← auto-discovered and registered as a skill
+        └── scripts/
+            └── generate_pdf.py            ← pre-built renderer the agent can run
+</code></pre>
+<table>
+<tr><td colspan="1" rowspan="1"><p><code>target</code> path</p>
+</td><td colspan="1" rowspan="1"><p>Variable</p>
+</td><td colspan="1" rowspan="1"><p>What the harness does with it</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>.agents/AGENTS.md</code></p>
+</td><td colspan="1" rowspan="1"><p><code>AGENTS_MD</code></p>
+</td><td colspan="1" rowspan="1"><p>Auto-loaded as persistent instructions: editorial voice, workflow, execution rules</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>.agents/skills/digest-pdf/SKILL.md</code></p>
+</td><td colspan="1" rowspan="1"><p><code>SKILL_MD</code></p>
+</td><td colspan="1" rowspan="1"><p>Auto-discovered and registered as a named skill; the agent invokes it by name</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>.agents/skills/digest-pdf/scripts/generate_pdf.py</code></p>
+</td><td colspan="1" rowspan="1"><p><code>GENERATE_PDF_PY</code></p>
+</td><td colspan="1" rowspan="1"><p>Pre-built PDF renderer; the agent writes <code>summaries.json</code> then runs this script</p>
+</td></tr>
+</table>
+<aside class="special"><p><strong>Skills are a cross-platform standard</strong> (agentskills.io). They give the agent procedural memory: not just what to know, but how to do a specific task step by step. The body of <code>SKILL.md</code> loads only when the skill triggers; metadata (name + description) stays in context all along. This is called progressive disclosure, and it keeps the context window clean.</p>
+<p>Two things to notice here:</p>
+<ul>
+<li><strong>Skill vs AGENTS.md</strong>: <code>AGENTS.md</code> is always in the agent&#39;s context from the first token: voice, workflow rules, execution constraints. <code>SKILL.md</code> loads on demand only when the agent decides the skill is needed for the task. <code>AGENTS.md</code> should stay tight; the recommended pattern is to include a short catalog at the bottom that lists available skills so the agent knows what to look for. The <code>## Skills</code> table in <code>.agents/AGENTS.md</code> is exactly that: it tells the agent that <code>digest-pdf</code> exists, so the harness can load its full <code>SKILL.md</code> when the task calls for it.</li>
+<li><strong>Managed Agents vs ADK</strong>: ADK uses the programmatic route: <code>load_skill_from_dir("skills/digest-pdf")</code> then <code>SkillToolset(skills=[skill])</code> in Python code. With Managed Agents you use the inline route: mount the file via <code>environment.sources</code> and the harness discovers it from <code>.agents/skills/*/SKILL.md</code> automatically. No registration code.</li>
+</ul>
+</aside>
+<h2 is-upgraded>Verify</h2>
+<pre><code language="language-bash" class="language-bash">uv run python run_digest.py
+</code></pre>
+<p>The run now takes 1-3 minutes. You should see the agent reading config files, writing summaries, and saving the PDF:</p>
+<pre><code language="language-text" class="language-text">[agent started]
+  [tool] url_context (https://news.ycombinator.com)
+  [tool] url_context (https://techcrunch.com)
+  [tool] run_code (import json...)
+  [tool] read_file (/workspace/summaries.json)
+  [tool] run_code (import subprocess...)
+I have successfully created today&#39;s tech news digest.
+...editorial summaries in the configured voice...
+Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d
+</code></pre>
+<p><code>environment_id</code> is now a real value: the sandbox ran with your config files and the agent created <code>digest.pdf</code>. The next step downloads it.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Download the PDF" duration="5">
+        <p>The agent wrote <code>digest.pdf</code> to <code>/workspace/digest.pdf</code> inside the sandbox. The environment snapshot is available as a tar archive via the Gemini Files API.</p>
+<aside class="special"><p><strong>In a real project</strong>, the download would live inside <code>run_digest()</code> right after the event loop (same run, same <code>environment_id</code>, no separate file). In this codelab it lives in <code>download_pdf.py</code> so you can re-download without re-running the agent. The <code>set_key</code> lines you added in the previous step write both IDs to <code>.env</code> automatically, so this file can read them straight away.</p>
+</aside>
+<p>Install <code>requests</code> if needed:</p>
+<pre><code language="language-bash" class="language-bash">uv pip install requests
+</code></pre>
+<h2 is-upgraded>What to fill in</h2>
+<p>Open <code>download_pdf.py</code>. It has two TODOs.</p>
+<p><strong>TODO 1:</strong> fill in the <code>requests.get()</code> call:</p>
+<pre><code language="language-python" class="language-python">r = requests.get(
+    f&#34;https://generativelanguage.googleapis.com/v1beta/files/environment-{environment_id}:download&#34;,
+    params={&#34;alt&#34;: &#34;media&#34;},
+    headers={&#34;x-goog-api-key&#34;: api_key},
+    allow_redirects=True,
+)
+r.raise_for_status()
+</code></pre>
+<p>The URL addresses the sandbox snapshot. <code>params={"alt": "media"}</code> returns raw bytes instead of metadata. Your existing <code>GEMINI_API_KEY</code> authenticates the Files API too.</p>
+<p><strong>TODO 2:</strong> extract only the PDF from the tar archive and read its bytes:</p>
+<pre><code language="language-python" class="language-python">            tar.extract(&#34;workspace/digest.pdf&#34;, path=tmp)
+</code></pre>
+<p>The agent saved the PDF to <code>/workspace/digest.pdf</code> inside the sandbox, so that is its path in the tar. Extracting only this one member (rather than calling <code>extractall()</code>) avoids permission errors on Mac caused by <code>/dev</code> entries in the snapshot.</p>
+<h2 is-upgraded>Verify</h2>
+<pre><code language="language-bash" class="language-bash">uv run python download_pdf.py
+</code></pre>
+<pre><code language="language-text" class="language-text">Saved digest.pdf (48,231 bytes)
+</code></pre>
+<p>Open <code>digest.pdf</code> in the same directory. It contains the formatted digest the agent generated from live web pages.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Continue the Conversation" duration="5">
+        <p>You already have <code>digest.pdf</code>. If you just wanted the file, you are done. This step is about something different: asking the agent to <strong>change</strong> the digest without re-fetching the web.</p>
+<p>The sandbox is still alive. The agent still has <code>/workspace/digest.pdf</code> and remembers every story it summarized. A second <code>interactions.create()</code> call sends a follow-up message into that same sandbox. Here you ask it to add a &#34;Why it matters&#34; note under each story, and it updates the PDF in place, with no re-fetching and no re-summarizing.</p>
+<h2 is-upgraded>What to fill in</h2>
+<p>Open <code>refine_digest.py</code>. It has three TODOs.</p>
+<p><strong>TODOs 1 and 2:</strong> fill in the two multi-turn parameters inside <code>interactions.create()</code>:</p>
+<pre><code language="language-python" class="language-python">    environment=environment_id,
+    previous_interaction_id=interaction_id,
+</code></pre>
+<p><code>environment=environment_id</code> resumes the same sandbox with its files and packages. <code>previous_interaction_id=interaction_id</code> gives the agent its conversation history. Nothing else changes from the first call.</p>
+<p><strong>TODO 3:</strong> persist the new <code>interaction_id</code> back to <code>.env</code> after the event loop:</p>
+<pre><code language="language-python" class="language-python">set_key(&#34;.env&#34;, &#34;INTERACTION_ID&#34;, interaction_id)
+</code></pre>
+<p>Every <code>interactions.create()</code> call produces a new <code>interaction_id</code>. Writing it back means the next run passes this refinement as <code>previous_interaction_id</code>, chaining turns correctly. The sandbox ID never changes so <code>ENVIRONMENT_ID</code> does not need to be updated.</p>
+<h2 is-upgraded>The two parameters that make multi-turn work</h2>
+<table>
+<tr><td colspan="1" rowspan="1"><p>ID</p>
+</td><td colspan="1" rowspan="1"><p>What it preserves</p>
+</td><td colspan="1" rowspan="1"><p>Analogy</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>environment=environment_id</code></p>
+</td><td colspan="1" rowspan="1"><p>Files, installed packages, system state: everything on the Linux filesystem</p>
+</td><td colspan="1" rowspan="1"><p>Keeping the same office desk between meetings</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p><code>previous_interaction_id=interaction_id</code></p>
+</td><td colspan="1" rowspan="1"><p>Conversation history: what the agent said and did in prior turns</p>
+</td><td colspan="1" rowspan="1"><p>Remembering what was discussed in the last meeting</p>
+</td></tr>
+</table>
+<p>You can pass either ID independently:</p>
+<ul>
+<li><code>environment_id</code> only: reuse files and packages, but start a fresh conversation. Useful for a new task in the same workspace.</li>
+<li><code>previous_interaction_id</code> only: continue the conversation context, but in a fresh sandbox (files are gone).</li>
+<li>Both: full continuity, which is what this step uses.</li>
+</ul>
+<p>Without <code>environment_id</code>: blank sandbox, no PDF. Without <code>previous_interaction_id</code>: no context, agent cannot refine a specific section.</p>
+<aside class="special"><p><strong>This replaces the session management you would write with ADK + Cloud Run.</strong> With ADK you store conversation history in a database and inject it into each request. With Managed Agents you pass two IDs and the platform handles the rest.</p>
+</aside>
+<h2 is-upgraded>Verify</h2>
+<pre><code language="language-bash" class="language-bash">uv run python refine_digest.py
+</code></pre>
+<p>The stream should be quick; the agent is not re-fetching anything. After it finishes:</p>
+<pre><code language="language-text" class="language-text">Refinement done.
+Saved digest_v2.pdf (52,418 bytes)
+</code></pre>
+<p>Open <code>digest_v2.pdf</code> and compare it to <code>digest.pdf</code>. Each story should now have a &#34;Why it matters&#34; line added.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Persist a Managed Agent Config" duration="5">
+        <p>Every call so far has passed <code>AGENTS.md</code>, <code>SKILL.md</code>, and <code>generate_pdf.py</code> inline. That works, but your calling code carries the full file contents on every run. <code>agents.create()</code> bakes the configuration into a saved named agent on Google&#39;s side. The next invocation just passes the agent ID:</p>
+<pre><code>Inline calls:   send sources on every call
+Named agent:    bake once → invoke by ID, no sources
+</code></pre>
+<h2 is-upgraded>What to fill in</h2>
+<p>Open <code>save_agent.py</code>. It has one TODO.</p>
+<aside class="warning"><p><code>AGENTS_MD</code>, <code>SKILL_MD</code>, and <code>GENERATE_PDF_PY</code> are imported from <code>run_digest.py</code>. Make sure you completed the Customize step and added those three loading lines before running this file.</p>
+</aside>
+<p>Notice that the constants are imported directly from <code>run_digest.py</code> (no duplication):</p>
+<pre><code language="language-python" class="language-python">from run_digest import BASE_AGENT, AGENTS_MD, SKILL_MD, GENERATE_PDF_PY
+</code></pre>
+<p><strong>TODO:</strong> fill in the <code>agents.create()</code> call:</p>
+<pre><code language="language-python" class="language-python">agent = client.agents.create(
+    id=&#34;my-digest&#34;,
+    base_agent=BASE_AGENT,
+    description=&#34;Daily tech digest with editorial voice and PDF generation.&#34;,
+    base_environment={
+        &#34;type&#34;: &#34;remote&#34;,
+        &#34;sources&#34;: [
+            {
+                &#34;type&#34;: &#34;inline&#34;,
+                &#34;target&#34;: &#34;.agents/AGENTS.md&#34;,
+                &#34;content&#34;: AGENTS_MD,
+            },
+            {
+                &#34;type&#34;: &#34;inline&#34;,
+                &#34;target&#34;: &#34;.agents/skills/digest-pdf/SKILL.md&#34;,
+                &#34;content&#34;: SKILL_MD,
+            },
+            {
+                &#34;type&#34;: &#34;inline&#34;,
+                &#34;target&#34;: &#34;.agents/skills/digest-pdf/scripts/generate_pdf.py&#34;,
+                &#34;content&#34;: GENERATE_PDF_PY,
+            },
+        ],
+    },
+)
+</code></pre>
+<p><code>base_environment</code> (not <code>environment</code>) is the key difference from the inline call in the previous step: the sources are stored on Google&#39;s side and mounted automatically on every future invocation. Run it once, not on every digest run.</p>
+<h2 is-upgraded>Verify: save the agent</h2>
+<pre><code language="language-bash" class="language-bash">uv run python save_agent.py
+</code></pre>
+<pre><code language="language-text" class="language-text">Saved: my-digest
+my-digest: Daily tech digest with editorial voice and PDF generation.
+</code></pre>
+<aside class="warning"><p><strong>409 Conflict?</strong> An agent named <code>my-digest</code> already exists from a previous run. The starter file deletes it automatically before creating a new one, so re-running is safe.</p>
+</aside>
+<h2 is-upgraded>Invoke the saved agent</h2>
+<p>Open <code>invoke_agent.py</code>. It calls the saved agent by ID with no sources:</p>
+<pre><code language="language-python" class="language-python">stream = client.interactions.create(
+    agent=&#34;my-digest&#34;,
+    input=PROMPT,
+    stream=True,
+    environment=&#34;remote&#34;,
+)
+</code></pre>
+<p>Compare this to the inline call: <code>agent=BASE_AGENT</code> is replaced by <code>"my-digest"</code>, and the full <code>environment</code> block with three inline sources is replaced by <code>environment="remote"</code>. The config is already baked in on Google&#39;s side.</p>
+<h2 is-upgraded>Verify: invoke the saved agent</h2>
+<pre><code language="language-bash" class="language-bash">uv run python invoke_agent.py
+</code></pre>
+<p>You should see the same live stream as the inline run, but the call carries no source files. After the run, <code>ENVIRONMENT_ID</code> and <code>INTERACTION_ID</code> in <code>.env</code> are updated so you can continue with <code>refine_digest.py</code> as before.</p>
+<pre><code language="language-text" class="language-text">[agent started]
+  [tool] read_file
+  [tool] write_file
+  [tool] run_code
+I have successfully created today&#39;s tech news digest.
+Done. environment_id=9a1c3e02-...
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Clean Up" duration="2">
+        <p>The sandbox auto-expires after 7 days of inactivity. No servers to stop. No containers to delete.</p>
+<p>If you saved an agent config, delete it:</p>
+<pre><code language="language-bash" class="language-bash">uv run python delete_agent.py
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Summary" duration="2">
+        <p>You built a managed agent from scratch, one concept at a time. Here is what each exercise taught:</p>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Exercise</p>
+</td><td colspan="1" rowspan="1"><p>Concept</p>
+</td><td colspan="1" rowspan="1"><p>Key API</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Make your first call</p>
+</td><td colspan="1" rowspan="1"><p>Provision a real Linux sandbox and stream its events live</p>
+</td><td colspan="1" rowspan="1"><p><code>interactions.create(agent, input, environment, stream=True)</code>, <code>event.event_type</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Customize the agent</p>
+</td><td colspan="1" rowspan="1"><p>Mount config files; persist IDs to <code>.env</code> in the same run</p>
+</td><td colspan="1" rowspan="1"><p><code>environment.sources</code>, <code>set_key</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Download the PDF</p>
+</td><td colspan="1" rowspan="1"><p>Download the PDF without re-running the agent</p>
+</td><td colspan="1" rowspan="1"><p>Gemini Files API <code>:download</code> in <code>download_pdf.py</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Continue the conversation</p>
+</td><td colspan="1" rowspan="1"><p>Continue the conversation without re-fetching the web</p>
+</td><td colspan="1" rowspan="1"><p><code>environment=environment_id</code>, <code>previous_interaction_id=interaction_id</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Persist agent config</p>
+</td><td colspan="1" rowspan="1"><p>Persist agent config; invoke by ID, no sources needed</p>
+</td><td colspan="1" rowspan="1"><p><code>agents.create()</code>, <code>agents.list()</code></p>
+</td></tr>
+</table>
+<h2 is-upgraded>Key patterns</h2>
+<ol type="1">
+<li><strong>One call, one sandbox</strong>: <code>interactions.create()</code> handles all infrastructure (no containers to deploy, no packages to install locally)</li>
+<li><strong>Progressive streaming</strong>: <code>stream=True</code> turns a 90-second black box into a live feed of tool calls and text chunks</li>
+<li><strong>Inline sources</strong>: mount <code>AGENTS.md</code>, <code>SKILL.md</code>, and pre-built scripts into the sandbox without any upload or deployment step</li>
+<li><strong>Harness auto-discovery</strong>: files placed in <code>.agents/</code> are picked up automatically (no SDK config required)</li>
+<li><strong>Two-dimensional state</strong>: <code>environment_id</code> tracks files and packages; <code>previous_interaction_id</code> tracks conversation context; either can be passed independently</li>
+<li><strong>Snapshot download</strong>: the environment is a full filesystem tar, accessible via the Gemini Files API</li>
+<li><strong>Named agents</strong>: <code>agents.create()</code> bakes config permanently; future calls pass only the agent ID and <code>environment="remote"</code>, with no sources</li>
+</ol>
+<h2 is-upgraded>ADK + Cloud Run vs. Managed Agents: the difference at a glance</h2>
+<table>
+<tr><td colspan="1" rowspan="1"><p>Capability</p>
+</td><td colspan="1" rowspan="1"><p>ADK + Cloud Run</p>
+</td><td colspan="1" rowspan="1"><p>Managed Agents with the Gemini API</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Provision a sandbox</p>
+</td><td colspan="1" rowspan="1"><p><code>docker build</code> + <code>gcloud run deploy</code></p>
+</td><td colspan="1" rowspan="1"><p><code>interactions.create()</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Define tools</p>
+</td><td colspan="1" rowspan="1"><p>Python functions registered with the agent</p>
+</td><td colspan="1" rowspan="1"><p>Built in: web browse, code execution, file system</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Install packages</p>
+</td><td colspan="1" rowspan="1"><p><code>pip install</code> in Dockerfile</p>
+</td><td colspan="1" rowspan="1"><p>Agent runs <code>pip install</code> inside sandbox</p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Stream events</p>
+</td><td colspan="1" rowspan="1"><p>Custom SSE infrastructure</p>
+</td><td colspan="1" rowspan="1"><p><code>stream=True</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Continue a session</p>
+</td><td colspan="1" rowspan="1"><p>Session database + context injection</p>
+</td><td colspan="1" rowspan="1"><p><code>environment_id</code> + <code>previous_interaction_id</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Config files</p>
+</td><td colspan="1" rowspan="1"><p>Hard-coded in agent or injected at startup</p>
+</td><td colspan="1" rowspan="1"><p>Mounted via <code>environment.sources</code></p>
+</td></tr>
+<tr><td colspan="1" rowspan="1"><p>Infrastructure to manage</p>
+</td><td colspan="1" rowspan="1"><p>Container, Cloud Run, IAM, secrets</p>
+</td><td colspan="1" rowspan="1"><p>None</p>
+</td></tr>
+</table>
+<h2 is-upgraded>Next steps</h2>
+<ul>
+<li>Read the <a href="https://ai.google.dev/gemini-api/docs/managed-agents-quickstart" target="_blank">Managed Agents with the Gemini API documentation</a></li>
+</ul>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

@@ -5,3 +5,4 @@ __pycache__/
 .venv/
 digest.pdf
 digest_v2.pdf
+managed-agents-gemini-api/

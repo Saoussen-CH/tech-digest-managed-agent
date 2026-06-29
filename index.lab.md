@@ -178,7 +178,7 @@ Duration: 05:00
 
 Click the button below to open this codelab in Google Cloud Shell. All dependencies are pre-installed.
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/Saoussen-CH/tech-digest-managed-agent)
+[Open in Cloud Shell](https://shell.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/Saoussen-CH/tech-digest-managed-agent)
 
 ### Option B: Local setup
 

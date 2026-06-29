@@ -110,7 +110,7 @@ client = genai.Client()
 
 stream = client.interactions.create(
     agent="antigravity-preview-05-2026",
-    input=PROMPT,
+    input="",
     stream=True,
     environment={
         "type": "remote",
@@ -239,7 +239,7 @@ cloudshell edit run_digest.py
 
 ### What to add
 
-**TODO 1:** replace `pass` with (ignore TODOs 3, 4, 5 for now — those are for the next step):
+**TODO 1:** replace `pass` with (ignore TODOs 3, 4 for now — those are for the next step):
 
 ```python
     from google import genai
@@ -350,13 +350,11 @@ Open each file to see what you are loading: `AGENTS.md` sets the editorial voice
 
 > aside positive
 >
-> **Why `PROMPT`?** `AGENTS.md` and `SKILL.md` tell the agent HOW to generate a digest, but the agent still needs a trigger to know WHEN to start and WHERE to save the file. `PROMPT` provides that: it activates the skill and specifies the output path. Without it the agent has no task to begin.
+> **Does `input` matter when `AGENTS.md` is loaded?** Once `AGENTS.md` is mounted via `sources`, it defines the full workflow: which sources to fetch, how to summarize, where to save the PDF. The `input` field can be empty (`""`). The agent reads `AGENTS.md` at startup and proceeds autonomously. You can still pass a prompt to override or extend the instructions for a specific run, but it is not required.
 
-Now make three more changes inside `run_digest()`:
+Now make two more changes inside `run_digest()`:
 
-**TODO 3:** change `input` to `PROMPT`
-
-**TODO 4:** change `environment` from `"remote"` to:
+**TODO 3:** change `environment` from `"remote"` to the sources dict, and set `input` to `""`:
 
 ```python
         environment={
@@ -381,7 +379,7 @@ Now make three more changes inside `run_digest()`:
         },
 ```
 
-**TODO 5:** add these lines right after `print(f"\nDone. environment_id={environment_id}")`:
+**TODO 4:** add these lines right after `print(f"\nDone. environment_id={environment_id}")`:
 
 ```python
     set_key(".env", "ENVIRONMENT_ID", environment_id)
@@ -648,7 +646,7 @@ Open `invoke_agent.py`. It calls the saved agent by ID with no sources:
 ```python
 stream = client.interactions.create(
     agent="my-digest",
-    input=PROMPT,
+    input="",
     stream=True,
     environment="remote",
 )

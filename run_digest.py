@@ -16,11 +16,6 @@ load_dotenv()
 BASE_AGENT = "antigravity-preview-05-2026"
 BASE_DIR = Path(__file__).resolve().parent
 
-PROMPT = (
-    "Generate today's tech digest and save it as /workspace/digest.pdf. "
-    "Follow the digest-pdf skill."
-)
-
 
 def load_source(relative_path: str) -> str:
     """Read a config file from the .agents/ directory."""
@@ -117,10 +112,10 @@ def run_digest():
     # TODO 1: create a genai.Client, call interactions.create() with agent=BASE_AGENT,
     # input="Fetch the Hacker News front page and list the top 5 stories.",
     # stream=True, environment="remote", then pass the stream to run_stream()
-    # TODO 3: change input= to PROMPT
-    # TODO 4: change environment= to a dict with type="remote" and sources=[AGENTS_MD, SKILL_MD, GENERATE_PDF_PY]
+    # TODO 3: change environment= to a dict with type="remote" and sources=[AGENTS_MD, SKILL_MD, GENERATE_PDF_PY]
+    #         and set input="" (AGENTS.md already defines the full workflow)
     pass
-    # TODO 5: after print(f"\nDone. environment_id={environment_id}"), add set_key() calls to persist both IDs
+    # TODO 4: after print(f"\nDone. environment_id={environment_id}"), add set_key() calls to persist both IDs
 
 
 if __name__ == "__main__":

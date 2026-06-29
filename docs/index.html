@@ -113,7 +113,7 @@ client = genai.Client()
 
 stream = client.interactions.create(
     agent=&#34;antigravity-preview-05-2026&#34;,
-    input=PROMPT,
+    input=&#34;&#34;,
     stream=True,
     environment={
         &#34;type&#34;: &#34;remote&#34;,
@@ -224,7 +224,7 @@ cloudshell edit .env
 <li><code>run_stream(stream)</code>: processes the event stream and returns <code>(environment_id, interaction_id)</code>. You do not need to write the event loop yourself.</li>
 </ul>
 <h2 is-upgraded>What to add</h2>
-<p><strong>TODO 1:</strong> replace <code>pass</code> with (ignore TODOs 3, 4, 5 for now — those are for the next step):</p>
+<p><strong>TODO 1:</strong> replace <code>pass</code> with (ignore TODOs 3, 4 for now — those are for the next step):</p>
 <pre><code language="language-python" class="language-python">    from google import genai
     client = genai.Client()
 
@@ -332,11 +332,10 @@ GENERATE_PDF_PY = load_source(&#34;.agents/skills/digest-pdf/scripts/generate_pd
 <p>Open each file to see what you are loading: <code>AGENTS.md</code> sets the editorial voice and workflow rules; <code>SKILL.md</code> is the step-by-step PDF playbook; <code>generate_pdf.py</code> is the pre-built renderer the agent will run.</p>
 <aside class="special"><p><strong>Why </strong><strong><code>AGENTS.md</code></strong><strong> instead of </strong><strong><code>system_instruction</code></strong><strong>?</strong> The Interactions API also accepts a <code>system_instruction</code> string parameter directly. Both approaches work and are additive when used together. <code>AGENTS.md</code> is the better fit here because it lives alongside your code in the repo, is version-controlled with the rest of the project, and is always in the agent&#39;s context from the first token. Use <code>system_instruction</code> for quick per-call tweaks; use <code>AGENTS.md</code> for long-form persona definitions and guidelines you want to version alongside your agent.</p>
 </aside>
-<aside class="special"><p><strong>Why </strong><strong><code>PROMPT</code></strong><strong>? </strong><code>AGENTS.md</code> and <code>SKILL.md</code> tell the agent HOW to generate a digest, but the agent still needs a trigger to know WHEN to start and WHERE to save the file. <code>PROMPT</code> provides that: it activates the skill and specifies the output path. Without it the agent has no task to begin.</p>
+<aside class="special"><p><strong>Does </strong><strong><code>input</code></strong><strong> matter when </strong><strong><code>AGENTS.md</code></strong><strong> is loaded?</strong> Once <code>AGENTS.md</code> is mounted via <code>sources</code>, it defines the full workflow: which sources to fetch, how to summarize, where to save the PDF. The <code>input</code> field can be empty (<code>""</code>). The agent reads <code>AGENTS.md</code> at startup and proceeds autonomously. You can still pass a prompt to override or extend the instructions for a specific run, but it is not required.</p>
 </aside>
-<p>Now make three more changes inside <code>run_digest()</code>:</p>
-<p><strong>TODO 3:</strong> change <code>input</code> to <code>PROMPT</code></p>
-<p><strong>TODO 4:</strong> change <code>environment</code> from <code>"remote"</code> to:</p>
+<p>Now make two more changes inside <code>run_digest()</code>:</p>
+<p><strong>TODO 3:</strong> change <code>environment</code> from <code>"remote"</code> to the sources dict, and set <code>input</code> to <code>""</code>:</p>
 <pre><code language="language-python" class="language-python">        environment={
             &#34;type&#34;: &#34;remote&#34;,
             &#34;sources&#34;: [
@@ -358,7 +357,7 @@ GENERATE_PDF_PY = load_source(&#34;.agents/skills/digest-pdf/scripts/generate_pd
             ],
         },
 </code></pre>
-<p><strong>TODO 5:</strong> add these lines right after <code>print(f"\nDone. environment_id={environment_id}")</code>:</p>
+<p><strong>TODO 4:</strong> add these lines right after <code>print(f"\nDone. environment_id={environment_id}")</code>:</p>
 <pre><code language="language-python" class="language-python">    set_key(&#34;.env&#34;, &#34;ENVIRONMENT_ID&#34;, environment_id)
     set_key(&#34;.env&#34;, &#34;INTERACTION_ID&#34;, interaction_id)
 </code></pre>
@@ -555,7 +554,7 @@ my-digest: Daily tech digest with editorial voice and PDF generation.
 <p>Open <code>invoke_agent.py</code>. It calls the saved agent by ID with no sources:</p>
 <pre><code language="language-python" class="language-python">stream = client.interactions.create(
     agent=&#34;my-digest&#34;,
-    input=PROMPT,
+    input=&#34;&#34;,
     stream=True,
     environment=&#34;remote&#34;,
 )

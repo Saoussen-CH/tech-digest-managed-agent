@@ -198,8 +198,9 @@ cd tech-digest-managed-agent
 </code></pre>
 <h2 is-upgraded>Configure your API key</h2>
 <pre><code language="language-bash" class="language-bash">cp .env.example .env
+cloudshell edit .env
 </code></pre>
-<p>Open <code>.env</code> and add your key:</p>
+<p>Set your key:</p>
 <pre><code language="language-text" class="language-text">GEMINI_API_KEY=your-key-here
 </code></pre>
 <aside class="warning"><p><strong>Billing required.</strong> The Managed Agents with the Gemini API charges for token usage. Each full digest run costs ~$0.30-$1.30. Environment compute (CPU, memory, sandbox execution) is free during the preview period. The free tier does not cover the Interactions API: add prepay credits at <a href="https://aistudio.google.com/billing" target="_blank">aistudio.google.com/billing</a>.</p>

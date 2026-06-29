@@ -197,9 +197,10 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 ```bash
 cp .env.example .env
+cloudshell edit .env
 ```
 
-Open `.env` and add your key:
+Set your key:
 
 ```text
 GEMINI_API_KEY=your-key-here

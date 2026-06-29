@@ -239,7 +239,7 @@ cloudshell edit run_digest.py
 
 ### What to add
 
-**TODO 1:** replace `pass` with:
+**TODO 1:** replace `pass` with (ignore TODOs 3, 4, 5 for now — those are for the next step):
 
 ```python
     from google import genai
@@ -349,11 +349,11 @@ Open each file to see what you are loading: `AGENTS.md` sets the editorial voice
 >
 > **Why `PROMPT`?** `AGENTS.md` and `SKILL.md` tell the agent HOW to generate a digest, but the agent still needs a trigger to know WHEN to start and WHERE to save the file. `PROMPT` provides that: it activates the skill and specifies the output path. Without it the agent has no task to begin.
 
-Now make three changes inside `run_digest()`:
+Now make three more changes inside `run_digest()`:
 
-2. Change `input` to `PROMPT`
+**TODO 3:** change `input` to `PROMPT`
 
-3. Change `environment` from `"remote"` to:
+**TODO 4:** change `environment` from `"remote"` to:
 
 ```python
         environment={
@@ -378,7 +378,7 @@ Now make three changes inside `run_digest()`:
         },
 ```
 
-4. Add these lines right after `print(f"\nDone. environment_id={environment_id}")`:
+**TODO 5:** add these lines right after `print(f"\nDone. environment_id={environment_id}")`:
 
 ```python
     set_key(".env", "ENVIRONMENT_ID", environment_id)

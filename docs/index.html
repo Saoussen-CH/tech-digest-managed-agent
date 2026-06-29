@@ -224,7 +224,7 @@ cloudshell edit .env
 <li><code>run_stream(stream)</code>: processes the event stream and returns <code>(environment_id, interaction_id)</code>. You do not need to write the event loop yourself.</li>
 </ul>
 <h2 is-upgraded>What to add</h2>
-<p><strong>TODO 1:</strong> replace <code>pass</code> with:</p>
+<p><strong>TODO 1:</strong> replace <code>pass</code> with (ignore TODOs 3, 4, 5 for now — those are for the next step):</p>
 <pre><code language="language-python" class="language-python">    from google import genai
     client = genai.Client()
 
@@ -331,11 +331,9 @@ GENERATE_PDF_PY = load_source(&#34;.agents/skills/digest-pdf/scripts/generate_pd
 </aside>
 <aside class="special"><p><strong>Why </strong><strong><code>PROMPT</code></strong><strong>? </strong><code>AGENTS.md</code> and <code>SKILL.md</code> tell the agent HOW to generate a digest, but the agent still needs a trigger to know WHEN to start and WHERE to save the file. <code>PROMPT</code> provides that: it activates the skill and specifies the output path. Without it the agent has no task to begin.</p>
 </aside>
-<p>Now make three changes inside <code>run_digest()</code>:</p>
-<ol type="1" start="2">
-<li>Change <code>input</code> to <code>PROMPT</code></li>
-<li>Change <code>environment</code> from <code>"remote"</code> to:</li>
-</ol>
+<p>Now make three more changes inside <code>run_digest()</code>:</p>
+<p><strong>TODO 3:</strong> change <code>input</code> to <code>PROMPT</code></p>
+<p><strong>TODO 4:</strong> change <code>environment</code> from <code>"remote"</code> to:</p>
 <pre><code language="language-python" class="language-python">        environment={
             &#34;type&#34;: &#34;remote&#34;,
             &#34;sources&#34;: [
@@ -357,9 +355,7 @@ GENERATE_PDF_PY = load_source(&#34;.agents/skills/digest-pdf/scripts/generate_pd
             ],
         },
 </code></pre>
-<ol type="1" start="4">
-<li>Add these lines right after <code>print(f"\nDone. environment_id={environment_id}")</code>:</li>
-</ol>
+<p><strong>TODO 5:</strong> add these lines right after <code>print(f"\nDone. environment_id={environment_id}")</code>:</p>
 <pre><code language="language-python" class="language-python">    set_key(&#34;.env&#34;, &#34;ENVIRONMENT_ID&#34;, environment_id)
     set_key(&#34;.env&#34;, &#34;INTERACTION_ID&#34;, interaction_id)
 </code></pre>

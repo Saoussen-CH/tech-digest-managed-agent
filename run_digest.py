@@ -102,7 +102,11 @@ def run_stream(stream) -> tuple[str, str]:
 
 def run_digest():
     # TODO 1: create a genai.Client, call interactions.create() with agent=BASE_AGENT,
-    # input, stream=True, and environment="remote", then pass the stream to run_stream()
+    # input="Fetch the Hacker News front page and list the top 5 stories.",
+    # stream=True, environment="remote", then pass the stream to run_stream()
+    # TODO 3: change input= to PROMPT
+    # TODO 4: change environment= to a dict with type="remote" and sources=[AGENTS_MD, SKILL_MD, GENERATE_PDF_PY]
+    # TODO 5: add set_key(".env", "ENVIRONMENT_ID", environment_id) and set_key(".env", "INTERACTION_ID", interaction_id)
     pass
 
 

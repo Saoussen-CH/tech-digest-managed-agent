@@ -1,6 +1,6 @@
 # Build a Managed Tech Digest Agent with the Gemini API
 
-Codelab starter repo. Follow the codelab to build a managed agent that fetches live tech news, writes editorial summaries, and generates a PDF — powered by [Managed agents on the Gemini API](https://ai.google.dev/gemini-api/docs/managed-agents).
+Codelab starter repo. Follow the codelab to build a managed agent that fetches live tech news, writes editorial summaries, and generates a PDF, powered by [Managed agents on the Gemini API](https://ai.google.dev/gemini-api/docs/managed-agents).
 
 **Codelab:** [http://saoussen-chaabnia-ai.com/tech-digest-managed-agent/](http://saoussen-chaabnia-ai.com/tech-digest-managed-agent/)
 
@@ -17,7 +17,7 @@ An agent that runs in a Google-hosted Linux sandbox and:
 ```
 run_digest.py        # Step 1 & 2: first agent call, then customize with voice + skill
 download_pdf.py      # Step 3: download digest.pdf from the sandbox
-refine_digest.py     # Step 4: multi-turn — ask the agent to refine the digest
+refine_digest.py     # Step 4: multi-turn: ask the agent to refine the digest
 save_agent.py        # Step 5: save your configured agent by ID
 invoke_agent.py      # Step 5: invoke the saved agent
 delete_agent.py      # cleanup helper

@@ -282,6 +282,8 @@ Here are the top 5 stories currently on the Hacker News front page:
 Done. environment_id=863e7fa217a54236e278eb61b2e2538c
 </code></pre>
 <p>The API returns a real <code>environment_id</code> even with <code>environment="remote"</code>. The sandbox ran. What is missing is config: no voice, no skill, no PDF generator. The agent just printed stories as text and stopped. The next step adds those.</p>
+<aside class="special"><p><strong>Why </strong><strong><code>run_code</code></strong><strong> and not </strong><strong><code>url_context</code></strong><strong>?</strong> The agent has three web tools available (<code>code_execution</code>, <code>google_search</code>, <code>url_context</code>) and picks autonomously. For structured scraping (extracting scores, links, and comment counts), it typically prefers <code>code_execution</code>: it writes a Python <code>requests</code> script, runs it in the sandbox, and parses the HTML in full Python. You may see <code>url_context</code> in other runs; both are valid.</p>
+</aside>
 <p>Each line of output maps to an event from <code>run_stream()</code>:</p>
 <table>
 <tr><td colspan="1" rowspan="1"><p><code>step.type</code></p>

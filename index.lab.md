@@ -301,6 +301,10 @@ Done. environment_id=863e7fa217a54236e278eb61b2e2538c
 
 The API returns a real `environment_id` even with `environment="remote"`. The sandbox ran. What is missing is config: no voice, no skill, no PDF generator. The agent just printed stories as text and stopped. The next step adds those.
 
+> aside positive
+>
+> **Why `run_code` and not `url_context`?** The agent has three web tools available (`code_execution`, `google_search`, `url_context`) and picks autonomously. For structured scraping (extracting scores, links, and comment counts), it typically prefers `code_execution`: it writes a Python `requests` script, runs it in the sandbox, and parses the HTML in full Python. You may see `url_context` in other runs; both are valid.
+
 Each line of output maps to an event from `run_stream()`:
 
 | `step.type` | What it is | What `run_stream()` prints |

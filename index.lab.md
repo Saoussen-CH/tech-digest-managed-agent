@@ -262,7 +262,7 @@ Replace `pass` with:
 
 `interactions.create()` is the core call. Four parameters make it work:
 
-- **`agent=BASE_AGENT`**: selects the Antigravity agent (`antigravity-preview-05-2026`). One call provisions a fully managed Ubuntu environment with Python 3.12, Node 22, git, pip, and curl pre-installed. No container to build, no deployment to run.
+- **`agent=BASE_AGENT`**: selects the Antigravity agent (`antigravity-preview-05-2026`), a general-purpose managed agent powered by Gemini 3.5 Flash. It comes with three built-in tools enabled by default: `code_execution` (run Bash, Python, Node.js), `google_search`, and `url_context` (fetch and read web pages). Filesystem tools (`read_file`, `write_file`, `list_files`) are enabled automatically when you pass the `environment` parameter. One call provisions a fully managed Ubuntu environment with Python 3.12, Node.js 22, git, pip, and curl pre-installed. No container to build, no deployment to run.
 - **`input`**: the task for this run. The agent browses Hacker News and reasons about the results.
 - **`environment="remote"`**: provisions a fresh cloud sandbox for this interaction.
 - **`stream=True`**: returns an iterable of events instead of blocking. Without it, the call waits 30-90 seconds and returns all output at once as `interaction.output_text`. With streaming you see the agent reason and act as it happens. Streaming is not an advanced feature here: it is the right default, because a 90-second black box gives you no signal about whether the agent is working or stuck.
@@ -336,6 +336,10 @@ GENERATE_PDF_PY = load_source(".agents/skills/digest-pdf/scripts/generate_pdf.py
 ```
 
 Open each file to see what you are loading: `AGENTS.md` sets the editorial voice and workflow rules; `SKILL.md` is the step-by-step PDF playbook; `generate_pdf.py` is the pre-built renderer the agent will run.
+
+> aside positive
+>
+> **Why `AGENTS.md` instead of `system_instruction`?** The Interactions API also accepts a `system_instruction` string parameter directly. Both approaches work and are additive when used together. `AGENTS.md` is the better fit here because it lives alongside your code in the repo, is version-controlled with the rest of the project, and is always in the agent's context from the first token. Use `system_instruction` for quick per-call tweaks; use `AGENTS.md` for long-form persona definitions and guidelines you want to version alongside your agent.
 
 > aside positive
 >

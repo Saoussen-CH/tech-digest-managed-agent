@@ -320,9 +320,7 @@ Done. environment_id=8d30ba94-f2c8-49bd-bbd4-e4a130e28e2d
 </aside>
 <h2 is-upgraded>What to change</h2>
 <p>Make four changes to <code>run_digest.py</code>:</p>
-<ol type="1">
-<li>Below <code>load_source()</code>, add the three module-level constants (these sit outside <code>run_digest()</code>, at the top of the file):</li>
-</ol>
+<p><strong>TODO 1:</strong> Below <code>load_source()</code>, add the three module-level constants (these sit outside <code>run_digest()</code>, at the top of the file):</p>
 <pre><code language="language-python" class="language-python">AGENTS_MD       = load_source(&#34;.agents/AGENTS.md&#34;)
 SKILL_MD        = load_source(&#34;.agents/skills/digest-pdf/SKILL.md&#34;)
 GENERATE_PDF_PY = load_source(&#34;.agents/skills/digest-pdf/scripts/generate_pdf.py&#34;)
@@ -507,13 +505,13 @@ Saved digest_v2.pdf (52,418 bytes)
 Named agent:    bake once → invoke by ID, no sources
 </code></pre>
 <h2 is-upgraded>What to fill in</h2>
-<p>Open <code>save_agent.py</code>. It has one TODO.</p>
+<p>Open <code>save_agent.py</code>. It has one TODO (TODO 1).</p>
 <aside class="warning"><p><code>AGENTS_MD</code>, <code>SKILL_MD</code>, and <code>GENERATE_PDF_PY</code> are imported from <code>run_digest.py</code>. Make sure you completed the Customize step and added those three loading lines before running this file.</p>
 </aside>
 <p>Notice that the constants are imported directly from <code>run_digest.py</code> (no duplication):</p>
 <pre><code language="language-python" class="language-python">from run_digest import BASE_AGENT, AGENTS_MD, SKILL_MD, GENERATE_PDF_PY
 </code></pre>
-<p><strong>TODO:</strong> fill in the <code>agents.create()</code> call:</p>
+<p><strong>TODO 1:</strong> fill in the <code>agents.create()</code> call:</p>
 <pre><code language="language-python" class="language-python">agent = client.agents.create(
     id=&#34;my-digest&#34;,
     base_agent=BASE_AGENT,

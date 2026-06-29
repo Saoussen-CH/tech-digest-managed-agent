@@ -13,12 +13,12 @@ try:
 except Exception:
     pass
 
-# TODO: call client.agents.create() with id="my-digest", base_agent=BASE_AGENT,
+# TODO 1: call client.agents.create() with id="my-digest", base_agent=BASE_AGENT,
 # a description, and base_environment with type="remote" and three inline sources:
 # AGENTS_MD → .agents/AGENTS.md
 # SKILL_MD  → .agents/skills/digest-pdf/SKILL.md
 # GENERATE_PDF_PY → .agents/skills/digest-pdf/scripts/generate_pdf.py
-raise NotImplementedError("Fill in the TODO above before running this file.")
+raise NotImplementedError("Fill in TODO 1 before running this file.")
 
 print(f"Saved: {agent.id}")
 

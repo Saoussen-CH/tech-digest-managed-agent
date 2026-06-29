@@ -328,7 +328,7 @@ The agent had no instructions: no voice, no skill, no PDF generator. In this ste
 
 Make four changes to `run_digest.py`:
 
-1. Below `load_source()`, add the three module-level constants (these sit outside `run_digest()`, at the top of the file):
+**TODO 1:** Below `load_source()`, add the three module-level constants (these sit outside `run_digest()`, at the top of the file):
 
 ```python
 AGENTS_MD       = load_source(".agents/AGENTS.md")
@@ -345,6 +345,7 @@ Open each file to see what you are loading: `AGENTS.md` sets the editorial voice
 Now make three changes inside `run_digest()`:
 
 2. Change `input` to `PROMPT`
+
 3. Change `environment` from `"remote"` to:
 
 ```python
@@ -569,7 +570,7 @@ Named agent:    bake once → invoke by ID, no sources
 
 ### What to fill in
 
-Open `save_agent.py`. It has one TODO.
+Open `save_agent.py`. It has one TODO (TODO 1).
 
 > aside negative
 >
@@ -581,7 +582,7 @@ Notice that the constants are imported directly from `run_digest.py` (no duplica
 from run_digest import BASE_AGENT, AGENTS_MD, SKILL_MD, GENERATE_PDF_PY
 ```
 
-**TODO:** fill in the `agents.create()` call:
+**TODO 1:** fill in the `agents.create()` call:
 
 ```python
 agent = client.agents.create(

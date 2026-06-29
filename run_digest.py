@@ -106,8 +106,8 @@ def run_digest():
     # stream=True, environment="remote", then pass the stream to run_stream()
     # TODO 3: change input= to PROMPT
     # TODO 4: change environment= to a dict with type="remote" and sources=[AGENTS_MD, SKILL_MD, GENERATE_PDF_PY]
-    # TODO 5: add set_key(".env", "ENVIRONMENT_ID", environment_id) and set_key(".env", "INTERACTION_ID", interaction_id)
     pass
+    # TODO 5: after print(f"\nDone. environment_id={environment_id}"), add set_key() calls to persist both IDs
 
 
 if __name__ == "__main__":

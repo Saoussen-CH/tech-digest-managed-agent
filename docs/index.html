@@ -218,13 +218,13 @@ cloudshell edit .env
 </code></pre>
 <aside class="special"><p><strong>Local setup:</strong> open <code>run_digest.py</code> in your editor of choice.</p>
 </aside>
-<p><code>run_digest()</code> is a stub (just <code>pass</code>). Two helpers are already pre-filled above it:</p>
+<p><code>run_digest()</code> has one TODO to fill in now and three more for the next step. Two helpers are already pre-filled above it:</p>
 <ul>
 <li><code>load_source(path)</code>: reads a file from <code>.agents/</code> relative to the script. You will use it in the next exercise to mount the editorial voice, PDF playbook, and renderer into the sandbox.</li>
 <li><code>run_stream(stream)</code>: processes the event stream and returns <code>(environment_id, interaction_id)</code>. You do not need to write the event loop yourself.</li>
 </ul>
 <h2 is-upgraded>What to add</h2>
-<p><strong>TODO 1:</strong> replace <code>pass</code> with (ignore TODOs 3, 4, 5 for now — those are for the next step):</p>
+<p><strong>TODO 1:</strong> replace <code>pass</code> with:</p>
 <pre><code language="language-python" class="language-python">    from google import genai
     client = genai.Client()
 

@@ -232,14 +232,14 @@ cloudshell edit run_digest.py
 >
 > **Local setup:** open `run_digest.py` in your editor of choice.
 
-`run_digest()` is a stub (just `pass`). Two helpers are already pre-filled above it:
+`run_digest()` has one TODO to fill in now and three more for the next step. Two helpers are already pre-filled above it:
 
 - `load_source(path)`: reads a file from `.agents/` relative to the script. You will use it in the next exercise to mount the editorial voice, PDF playbook, and renderer into the sandbox.
 - `run_stream(stream)`: processes the event stream and returns `(environment_id, interaction_id)`. You do not need to write the event loop yourself.
 
 ### What to add
 
-**TODO 1:** replace `pass` with (ignore TODOs 3, 4, 5 for now — those are for the next step):
+**TODO 1:** replace `pass` with:
 
 ```python
     from google import genai

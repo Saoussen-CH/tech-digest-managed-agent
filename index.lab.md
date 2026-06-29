@@ -270,7 +270,7 @@ Replace `pass` with:
 - **`agent=BASE_AGENT`**: selects the Antigravity agent (`antigravity-preview-05-2026`). One call provisions a fully managed Ubuntu environment with Python 3.12, Node 22, git, pip, and curl pre-installed. No container to build, no deployment to run.
 - **`input`**: the task for this run. The agent browses Hacker News and reasons about the results.
 - **`environment="remote"`**: provisions a fresh cloud sandbox for this interaction.
-- **`stream=True`**: returns an iterable of events instead of blocking. Without it, the call waits 30-90 seconds and returns all output at once as `interaction.output_text`. With streaming you see the agent reason and act as it happens. Streaming is not an advanced feature here — it is the right default, because a 90-second black box gives you no signal about whether the agent is working or stuck.
+- **`stream=True`**: returns an iterable of events instead of blocking. Without it, the call waits 30-90 seconds and returns all output at once as `interaction.output_text`. With streaming you see the agent reason and act as it happens. Streaming is not an advanced feature here: it is the right default, because a 90-second black box gives you no signal about whether the agent is working or stuck.
 
 **What you just provisioned:** every `interactions.create()` call boots a dedicated sandbox:
 

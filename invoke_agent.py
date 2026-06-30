@@ -4,7 +4,7 @@ Run this after save_agent.py to confirm the saved config works.
 """
 from dotenv import load_dotenv, set_key
 from google import genai
-from run_digest import PROMPT, run_stream
+from run_digest import run_stream
 
 load_dotenv()
 
@@ -14,7 +14,7 @@ print("Invoking saved agent my-digest...", flush=True)
 
 stream = client.interactions.create(
     agent="my-digest",
-    input=PROMPT,
+    input="",
     stream=True,
     environment="remote",
 )

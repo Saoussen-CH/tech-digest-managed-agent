@@ -2,7 +2,7 @@
 
 Codelab starter repo. Follow the codelab to build a managed agent that fetches live tech news, writes editorial summaries, and generates a PDF, powered by [Managed agents on the Gemini API](https://ai.google.dev/gemini-api/docs/managed-agents).
 
-**Codelab:** [http://saoussen-chaabnia-ai.com/tech-digest-managed-agent/](http://saoussen-chaabnia-ai.com/tech-digest-managed-agent/)
+**Codelab:** [https://codelabs.developers.google.com/tech-digest-managed-agent](https://codelabs.developers.google.com/tech-digest-managed-agent)
 
 ## What you build
 

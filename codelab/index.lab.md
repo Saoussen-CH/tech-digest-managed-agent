@@ -1,12 +1,13 @@
 ---
-id: managed-agents-gemini-api
+id: tech-digest-managed-agent
 summary: Build a managed agent that fetches live tech news, writes editorial summaries, and generates a PDF, powered by Managed agents on the Gemini API.
-status: Draft
-authors: Saoussen Chaabnia
-categories: AI, Gemini API
+status: Published
+authors: Saoussen Chaabnia & Mete Atamel
+categories: AI, Google Cloud, Gemini API
 tags: web
-feedback link: https://github.com/googlecodelabs/feedback/issues/new?title=[managed-agents-gemini-api]
-keywords: docType:Codelab, category:AI, product:GeminiAPI
+feedback link: https://github.com/googlecodelabs/feedback/issues/new?title=[tech-digest-managed-agent]
+analytics account: UA-52746336-1
+keywords: docType:Codelab, category:Cloud, category:AI, product:GeminiAPI
 
 ---
 

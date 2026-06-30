@@ -66,7 +66,7 @@ from google.adk.tools import google_search, built_in_code_execution
 
 agent = LlmAgent(
     name="digest-agent",
-    model="gemini-2.0-flash",
+    model=MODEL,
     instruction=AGENTS_MD,          # your editorial voice and rules
     tools=[google_search, built_in_code_execution],
 )
